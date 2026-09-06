@@ -1,0 +1,15 @@
+{
+  "name": "netmon",
+  "version": "0.1.0",
+  "description": "In-flight Wi-Fi health monitor for the terminal (macOS, zero runtime deps)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/main.ts",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.0"
+  }
+}
