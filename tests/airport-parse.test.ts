@@ -24,7 +24,7 @@ test('awdl0 block (no status, no signal) → assoc no, nulls', () => {
 });
 test('<redacted> SSID → null; a real SSID is kept', () => {
   expect(parseAirportJson(basic, 'en1')?.ssid).toBeNull();
-  expect(parseAirportJson(basic.replace('"<redacted>"', '"GogoInflight"'), 'en1')?.ssid).toBe('GogoInflight');
+  expect(parseAirportJson(basic.replace('"<redacted>"', '"TestNet"'), 'en1')?.ssid).toBe('TestNet');
 });
 test('not connected → assoc no with null fields', () => {
   expect(parseAirportJson(notConnected, 'en1')).toEqual(empty('en1'));

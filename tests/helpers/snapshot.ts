@@ -45,7 +45,7 @@ export function makeRoute(o: Partial<RouteInfo> = {}): RouteInfo {
 
 export function makeWifi(o: Partial<Aged<WifiInfo>> = {}): Aged<WifiInfo> {
   return {
-    iface: 'en1', assoc: 'yes', ssid: 'Airline-WiFi', rssi: -72, noise: -95, snr: 23,
+    iface: 'en1', assoc: 'yes', ssid: 'TestNet', rssi: -72, noise: -95, snr: 23,
     label: 'fair', txRate: 216, mcs: 4, channel: '157 (5GHz, 80MHz)', phy: '802.11ax',
     at: NOW - 28000, ageS: 28, ...o,
   };

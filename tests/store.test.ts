@@ -52,7 +52,7 @@ describe('Store', () => {
     expect(out.snap.openOutage?.startedAt).toBe(WALL + (EPOCH + 9000 - BASE)); // backdated to the first LOST
     expect(out.snap.downFor).toBe(Math.round((BASE + 18_000 - (EPOCH + 9000)) / 1000));
     expect(out.snap.verdicts.map((v) => v.level)).toEqual(['NO', 'NO', 'NO', 'NO']);
-    expect(out.snap.banner[1]).toContain("Plane's uplink dropped");
+    expect(out.snap.banner[1]).toContain("Upstream link dropped");
     expect(out.snap.grade.grade).toBeNull();
 
     // replies resume from seq 18
@@ -150,7 +150,7 @@ describe('Store', () => {
     expect(snap?.lossSource).toBe('router');
     expect(snap?.loss60).toBe(0); // gateway stream is clean
     expect(snap?.state).toBe('UP');
-    expect(snap?.tip).toContain('airline blocks ping');
+    expect(snap?.tip).toContain('network blocks ping');
   });
 
   test('a sleep gap forgets pre-sleep evidence: no phantom drop, WARMUP until fresh samples', () => {

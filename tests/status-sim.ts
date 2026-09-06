@@ -31,7 +31,7 @@ export function https(kind: HttpsKind, startedAt: number): HttpsResult {
 
 export function wifi(rssi: number | null, assoc: 'yes' | 'no', at: number): Timed<WifiInfo> {
   return {
-    iface: 'en1', assoc, ssid: 'plane', rssi, noise: -95, snr: rssi == null ? null : rssi + 95, label: 'fair',
+    iface: 'en1', assoc, ssid: 'TestNet', rssi, noise: -95, snr: rssi == null ? null : rssi + 95, label: 'fair',
     txRate: 216, mcs: 4, channel: '157', phy: '802.11ax', at,
   };
 }

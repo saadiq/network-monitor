@@ -23,7 +23,7 @@ const route = (over: Partial<RouteInfo> = {}): RouteInfo => ({
 });
 
 const wifi = (assoc: 'yes' | 'no'): Timed<WifiInfo> => ({
-  iface: 'en1', assoc, ssid: assoc === 'yes' ? 'GogoInflight' : null, rssi: assoc === 'yes' ? -71 : null,
+  iface: 'en1', assoc, ssid: assoc === 'yes' ? 'TestNet' : null, rssi: assoc === 'yes' ? -71 : null,
   noise: null, snr: null, label: null, txRate: null, mcs: null, channel: null, phy: null, at: 0,
 });
 
