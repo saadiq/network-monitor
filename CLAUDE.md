@@ -1,4 +1,4 @@
-# netmon — in-flight Wi-Fi monitor (Bun + TypeScript, macOS)
+# netmon — network health monitor (Bun + TypeScript, macOS)
 
 - Spec: `docs/superpowers/specs/2026-09-06-network-monitor-design.md` (authoritative; section numbers are referenced in code comments).
 - Run: `bun run src/main.ts` (or `bun start`). Tests: `bun test`. Typecheck: `bunx tsc --noEmit`.

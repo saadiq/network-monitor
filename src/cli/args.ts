@@ -113,7 +113,7 @@ export function parseArgs(argv: string[], pe: ParseEnv = {}): Options {
 /** §12 usage text (trailing newline). */
 export function usage(): string {
   return [
-    'netmon — in-flight Wi-Fi monitor (macOS)',
+    'netmon — network health monitor (macOS)',
     '',
     'Usage: bun run src/main.ts [options]',
     `  --target <ip>        internet ping/route target (default ${DEFAULT_TARGET})`,

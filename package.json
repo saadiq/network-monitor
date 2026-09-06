@@ -1,7 +1,7 @@
 {
   "name": "netmon",
   "version": "0.1.0",
-  "description": "In-flight Wi-Fi health monitor for the terminal (macOS, zero runtime deps)",
+  "description": "Terminal network health monitor for flaky Wi-Fi (macOS, Bun, zero runtime deps)",
   "type": "module",
   "private": true,
   "scripts": {
