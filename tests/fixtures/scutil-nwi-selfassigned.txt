@@ -1,0 +1,16 @@
+Network information
+
+IPv4 network interface information
+     en1 : flags      : 0x1 (IPv4)
+           address    : 169.254.17.42
+           reach      : 0x00000000 (Not Reachable)
+
+   REACH : flags 0x00000000 (Not Reachable)
+
+IPv6 network interface information
+   No IPv6 states found
+
+
+   REACH : flags 0x00000000 (Not Reachable)
+
+Network interfaces: en1

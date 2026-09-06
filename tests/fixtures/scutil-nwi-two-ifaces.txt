@@ -1,0 +1,20 @@
+Network information
+
+IPv4 network interface information
+     en0 : flags      : 0x5 (IPv4,DNS)
+           address    : 10.0.0.5
+           reach      : 0x00000002 (Reachable)
+     en1 : flags      : 0x5 (IPv4,DNS)
+           address    : 192.168.0.65
+           reach      : 0x00000002 (Reachable)
+
+   REACH : flags 0x00000002 (Reachable)
+
+IPv6 network interface information
+     en1 : flags      : 0x5 (IPv6,DNS)
+           address    : fddf:bae3:5c17:f5::1
+           reach      : 0x00000002 (Reachable)
+
+   REACH : flags 0x00000002 (Reachable)
+
+Network interfaces: en0 en1

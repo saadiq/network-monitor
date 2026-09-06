@@ -1,0 +1,13 @@
+PING 10.255.255.1 (10.255.255.1): 16 data bytes
+76 bytes from 67.87.20.1: Communication prohibited by filter
+Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst
+ 4  5  00 2c00 735d   0 0000  3e  01 3e8a 192.168.0.65  10.255.255.1 
+
+Request timeout for icmp_seq 0
+76 bytes from 67.87.20.1: Communication prohibited by filter
+Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst
+ 4  5  00 2c00 2a29   0 0000  3e  01 87be 192.168.0.65  10.255.255.1 
+
+
+--- 10.255.255.1 ping statistics ---
+2 packets transmitted, 0 packets received, 100.0% packet loss

@@ -1,0 +1,11 @@
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 13177
+;; flags: qr rd ra ad; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; Query time: 25 msec
+;; SERVER: 1.1.1.1#53(1.1.1.1)
+;; WHEN: Sun Sep 06 09:12:57 EDT 2026
+;; MSG SIZE  rcvd: 111
+

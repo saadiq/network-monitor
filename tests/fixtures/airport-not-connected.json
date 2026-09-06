@@ -1,0 +1,24 @@
+{
+  "SPAirPortDataType" : [
+    {
+      "spairport_airport_interfaces" : [
+        {
+          "_name" : "en1",
+          "spairport_caps_airdrop" : "spairport_caps_supported",
+          "spairport_status_information" : "spairport_status_disconnected",
+          "spairport_supported_channels" : [ "1 (2GHz)", "36 (5GHz)" ],
+          "spairport_supported_phymodes" : "802.11 a/b/g/n/ac/ax",
+          "spairport_wireless_mac_address" : "ce:41:3f:56:c0:1c"
+        },
+        {
+          "_name" : "awdl0",
+          "spairport_current_network_information" : {
+            "spairport_network_type" : "spairport_network_type_station"
+          },
+          "spairport_supported_channels" : [ "1 (2GHz)", "36 (5GHz)" ],
+          "spairport_wireless_mac_address" : "b2:a2:97:d7:48:e5"
+        }
+      ]
+    }
+  ]
+}
