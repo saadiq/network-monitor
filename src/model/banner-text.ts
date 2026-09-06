@@ -135,17 +135,17 @@ function downSentence(snap: Snapshot, g: Glyphs): string {
   const e = expectation(snap);
   switch (snap.cause) {
     case 'router':
-      return `Can't reach the plane's router${signalNote(snap)}. Move the laptop or re-join Wi-Fi. ${e}`;
+      return `Can't reach the router${signalNote(snap)}. Move the laptop or re-join Wi-Fi. ${e}`;
     case 'wifi':
       return `Wi-Fi link weak or lost${signalNote(snap)}. Move the laptop or re-join the network. ${e}`;
     default:
-      return `Plane's uplink dropped ${g.em} router fine, it's not you. ${e}`;
+      return `Upstream link dropped ${g.em} router fine, it's not you. ${e}`;
   }
 }
 
 function noLinkSentence(snap: Snapshot): string {
   switch (snap.cause) {
-    case 'not-joined': return 'Not joined to any Wi-Fi network. Join the airline Wi-Fi from the menu bar.';
+    case 'not-joined': return 'Not joined to any Wi-Fi network. Join a Wi-Fi network from the menu bar.';
     case 'no-dhcp': return 'Joined Wi-Fi but got no address from the router (DHCP). Usually clears in ~30s; otherwise re-join.';
     default: return 'No network route. Check Wi-Fi in the menu bar.';
   }
@@ -155,7 +155,7 @@ function dnsSentence(snap: Snapshot, g: Glyphs): string {
   let s = `Pings work but names don't resolve ${g.em} browsing is broken.`;
   if (!snap.dnsSysOk && snap.dnsDirectOk) {
     const who = snap.dnsServer === TAILSCALE_DNS ? 'Tailscale' : 'the resolver';
-    s += ` Direct DNS works: likely ${who}, not the plane.`;
+    s += ` Direct DNS works: likely ${who}, not the network.`;
   }
   return s;
 }
@@ -170,7 +170,7 @@ export function bannerSentence(snap: Snapshot, g: Glyphs = GLYPHS.unicode): stri
   switch (snap.state) {
     case 'WARMUP': return `Measuring${g.ellipsis} first verdict in a few seconds.`;
     case 'NO_LINK': return noLinkSentence(snap);
-    case 'PORTAL': return `Logged out of the airline portal. Press o to open the login page. ${expectation(snap)}`;
+    case 'PORTAL': return `Captive portal wants a login. Press o to open the login page. ${expectation(snap)}`;
     case 'DOWN': return downSentence(snap, g);
     case 'DEGRADED':
       if (snap.cause === 'dns') return dnsSentence(snap, g);

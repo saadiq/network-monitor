@@ -113,9 +113,9 @@ test('DEGRADED/dns with and without the Tailscale suffix', () => {
   const both = { state: 'DEGRADED' as const, cause: 'dns' as const, dnsSysOk: false, dnsDirectOk: false, dnsOk: false };
   expect(line2(both)).toBe("Pings work but names don't resolve — browsing is broken.");
   expect(line2({ ...both, dnsDirectOk: true, dnsOk: true }))
-    .toBe("Pings work but names don't resolve — browsing is broken. Direct DNS works: likely Tailscale, not the plane.");
+    .toBe("Pings work but names don't resolve — browsing is broken. Direct DNS works: likely Tailscale, not the network.");
   expect(line2({ ...both, dnsDirectOk: true, dnsOk: true, dnsServer: '192.168.0.1' }))
-    .toBe("Pings work but names don't resolve — browsing is broken. Direct DNS works: likely the resolver, not the plane.");
+    .toBe("Pings work but names don't resolve — browsing is broken. Direct DNS works: likely the resolver, not the network.");
 });
 
 test('DEGRADED/web shows the streak', () => {
@@ -127,19 +127,19 @@ test('DEGRADED/web shows the streak', () => {
 test('DOWN sentences with expectation', () => {
   const down = { state: 'DOWN' as const, grade: makeGrade({ grade: null }), downFor: 42 };
   expect(line2({ ...down, cause: 'uplink' }))
-    .toBe("Plane's uplink dropped — router fine, it's not you. Drops here usually last ~22s (longest 1m04s).");
+    .toBe("Upstream link dropped — router fine, it's not you. Drops here usually last ~22s (longest 1m04s).");
   expect(line2({ ...down, cause: 'router' }))
-    .toBe("Can't reach the plane's router (signal -72 dBm). Move the laptop or re-join Wi-Fi. Drops here usually last ~22s (longest 1m04s).");
+    .toBe("Can't reach the router (signal -72 dBm). Move the laptop or re-join Wi-Fi. Drops here usually last ~22s (longest 1m04s).");
   expect(line2({ ...down, cause: 'wifi', wifi: makeWifi({ rssi: -88 }) }))
     .toBe('Wi-Fi link weak or lost (signal -88 dBm). Move the laptop or re-join the network. Drops here usually last ~22s (longest 1m04s).');
   expect(line2({ ...down, cause: 'router', wifi: null }))
-    .toBe("Can't reach the plane's router. Move the laptop or re-join Wi-Fi. Drops here usually last ~22s (longest 1m04s).");
+    .toBe("Can't reach the router. Move the laptop or re-join Wi-Fi. Drops here usually last ~22s (longest 1m04s).");
 });
 
 test('PORTAL and NO_LINK sentences', () => {
   expect(line2({ state: 'PORTAL', cause: 'portal', downFor: 65, drops: NO_DROPS }))
-    .toBe('Logged out of the airline portal. Press o to open the login page. First drop this session.');
-  expect(line2({ state: 'NO_LINK', cause: 'not-joined' })).toBe('Not joined to any Wi-Fi network. Join the airline Wi-Fi from the menu bar.');
+    .toBe('Captive portal wants a login. Press o to open the login page. First drop this session.');
+  expect(line2({ state: 'NO_LINK', cause: 'not-joined' })).toBe('Not joined to any Wi-Fi network. Join a Wi-Fi network from the menu bar.');
   expect(line2({ state: 'NO_LINK', cause: 'no-dhcp' })).toBe('Joined Wi-Fi but got no address from the router (DHCP). Usually clears in ~30s; otherwise re-join.');
   expect(line2({ state: 'NO_LINK', cause: 'unknown' })).toBe('No network route. Check Wi-Fi in the menu bar.');
 });

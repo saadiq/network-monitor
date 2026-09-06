@@ -25,12 +25,12 @@ function slowDnsTip(snap: Snapshot, em: string): string | null {
   return `${name} is ${Math.round(ratio)}x slower than direct (${Math.round(sys.ms)} vs ${Math.round(dir.ms)}ms) ${em} pages feel slow${tail}`;
 }
 
-/** `system DNS (Tailscale 100.100.100.100) failing; direct DNS works — Tailscale, not the plane` */
+/** `system DNS (Tailscale 100.100.100.100) failing; direct DNS works — Tailscale, not the network` */
 function sysDnsFailingTip(snap: Snapshot, em: string): string {
   const srv = snap.dnsServer;
   const ts = srv === TAILSCALE_DNS;
   const who = srv == null ? '' : ` (${ts ? `Tailscale ${srv}` : srv})`;
-  return `system DNS${who} failing; direct DNS works ${em} ${ts ? 'Tailscale' : 'the resolver'}, not the plane`;
+  return `system DNS${who} failing; direct DNS works ${em} ${ts ? 'Tailscale' : 'the resolver'}, not the network`;
 }
 
 /** `traffic exits via utun9 (Tailscale exit node) — measurements go through the tunnel` */
@@ -62,8 +62,8 @@ export function pickTip(snap: Snapshot, g: Glyphs = GLYPHS.unicode): string | nu
     return `no address from the router yet (DHCP) ${em} wait ~30s, then re-join Wi-Fi`;
   }
   const rssi = freshRssi(snap);
-  if (rssi != null && rssi < TIP_WEAK_RSSI) return `weak signal ${rssi} dBm ${em} move the laptop; it may just be the seat`;
-  if (snap.icmpBlocked) return `airline blocks ping ${em} judging by HTTP checks, latency is coarse`;
+  if (rssi != null && rssi < TIP_WEAK_RSSI) return `weak signal ${rssi} dBm ${em} move closer to the access point`;
+  if (snap.icmpBlocked) return `network blocks ping ${em} judging by HTTP checks, latency is coarse`;
   if (snap.gwNoIcmp) return `router ignores ping ${em} local link judged by internet checks`;
   const slow = slowDnsTip(snap, em);
   if (slow) return slow;

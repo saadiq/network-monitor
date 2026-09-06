@@ -16,17 +16,17 @@ test('PORTAL wins over everything', () => {
 test('NO_LINK no-dhcp beats weak signal; other NO_LINK causes do not', () => {
   const s = tip({ state: 'NO_LINK', cause: 'no-dhcp', wifi: makeWifi({ rssi: -90 }) });
   expect(s).toBe('no address from the router yet (DHCP) — wait ~30s, then re-join Wi-Fi');
-  expect(tip({ state: 'NO_LINK', cause: 'not-joined', wifi: makeWifi({ rssi: -90 }) })).toBe('weak signal -90 dBm — move the laptop; it may just be the seat');
+  expect(tip({ state: 'NO_LINK', cause: 'not-joined', wifi: makeWifi({ rssi: -90 }) })).toBe('weak signal -90 dBm — move closer to the access point');
 });
 
 test('weak signal needs rssi < -80 and a fresh reading', () => {
-  expect(tip({ wifi: makeWifi({ rssi: -84 }), dnsSys: makeDns() })).toBe('weak signal -84 dBm — move the laptop; it may just be the seat');
+  expect(tip({ wifi: makeWifi({ rssi: -84 }), dnsSys: makeDns() })).toBe('weak signal -84 dBm — move closer to the access point');
   expect(tip({ wifi: makeWifi({ rssi: -80 }), dnsSys: makeDns() })).toBeNull();
   expect(tip({ wifi: makeWifi({ rssi: -84 }), wifiStatus: 'stale', dnsSys: makeDns() })).toBeNull();
 });
 
 test('icmpBlocked > gwNoIcmp', () => {
-  expect(tip({ icmpBlocked: true, gwNoIcmp: true })).toBe('airline blocks ping — judging by HTTP checks, latency is coarse');
+  expect(tip({ icmpBlocked: true, gwNoIcmp: true })).toBe('network blocks ping — judging by HTTP checks, latency is coarse');
   expect(tip({ gwNoIcmp: true })).toBe('router ignores ping — local link judged by internet checks');
 });
 
@@ -37,14 +37,14 @@ test('Tailscale DNS slow: ratio ≥ 4 and sys > 200 ms', () => {
   expect(tip({ dnsServer: '192.168.0.1', dnsSys: makeDns({ ms: 380, server: '192.168.0.1' }) }))
     .toBe('system DNS is 12x slower than direct (380 vs 31ms) — pages feel slow.');
   expect(tip({ dnsSys: makeDns({ ms: 380, ok: false }), dnsSysOk: false, dnsDirectOk: true }))
-    .toBe('system DNS (Tailscale 100.100.100.100) failing; direct DNS works — Tailscale, not the plane');
+    .toBe('system DNS (Tailscale 100.100.100.100) failing; direct DNS works — Tailscale, not the network');
 });
 
 test('system DNS failing while direct works', () => {
   expect(tip({ dnsSysOk: false, dnsDirectOk: true, dnsSys: makeDns({ ok: false, ms: null }) }))
-    .toBe('system DNS (Tailscale 100.100.100.100) failing; direct DNS works — Tailscale, not the plane');
+    .toBe('system DNS (Tailscale 100.100.100.100) failing; direct DNS works — Tailscale, not the network');
   expect(tip({ dnsSysOk: false, dnsDirectOk: true, dnsServer: '10.0.0.1', dnsSys: makeDns({ ok: false, ms: null }) }))
-    .toBe('system DNS (10.0.0.1) failing; direct DNS works — the resolver, not the plane');
+    .toBe('system DNS (10.0.0.1) failing; direct DNS works — the resolver, not the network');
   expect(tip({ dnsSysOk: false, dnsDirectOk: false, dnsOk: false, dnsSys: makeDns({ ok: false, ms: null }) })).toBeNull();
 });
 
@@ -78,5 +78,5 @@ test('sat and under-load tips; priority sat > load', () => {
 });
 
 test('ascii glyphs swap the dash', () => {
-  expect(pickTip(makeSnapshot({ icmpBlocked: true }), GLYPHS.ascii)).toBe('airline blocks ping - judging by HTTP checks, latency is coarse');
+  expect(pickTip(makeSnapshot({ icmpBlocked: true }), GLYPHS.ascii)).toBe('network blocks ping - judging by HTTP checks, latency is coarse');
 });
