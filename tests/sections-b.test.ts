@@ -267,22 +267,22 @@ test('footer: keys left, probe rate right-aligned to width; live states', () => 
   expect(f[0]?.startsWith('  q quit   t speed test (250 KB)   b bell:on   o open portal')).toBe(true);
   expect(f[0]?.endsWith('probes ~1.2 MB/h')).toBe(true);
   const c = footer(makeSnapshot(), ui({ bellOn: false }), 80);
-  expect(visibleWidth(c[0] ?? '')).toBe(80); expect(c[0]?.startsWith('  q quit  t speed test (250 KB)  b bell:off  o open portal')).toBe(true);
+  expect(visibleWidth(c[0] ?? '')).toBe(80); expect(c[0]?.startsWith('  q quit  t speed test  b bell:off  o open portal  v simple')).toBe(true);
   expect(c[0]?.endsWith('probes ~1.2 MB/h')).toBe(true);
   const running = footer(makeSnapshot(), ui({ speedRunning: true }), 100)[0] ?? '';
   expect(running.includes('t speed test (running)')).toBe(true);
   const log = footer(makeSnapshot(), ui({ logStatus: 'off (EACCES)' }), 100)[0] ?? '';
   expect(log.endsWith('log: off (EACCES)  probes ~1.2 MB/h')).toBe(true);
   const msg = footer(makeSnapshot(), ui({ footerMsg: 'not while down', footerMsgUntil: NOW + 3000 }), 100)[0] ?? '';
-  expect([msg.includes('o open portal   not while down'), visibleWidth(msg)]).toEqual([true, 100]);
+  expect([msg.includes('v simple   not while down'), visibleWidth(msg)]).toEqual([true, 100]);
   const expired = footer(makeSnapshot(), ui({ footerMsg: 'not while down', footerMsgUntil: NOW - 1 }), 100)[0] ?? '';
   expect(expired.includes('not while down')).toBe(false);
   const n = footer(makeSnapshot(), ui(), 72)[0] ?? '';
   expect(visibleWidth(n)).toBe(72);
-  expect(n.startsWith('  q quit  t speed test  b bell:on  o open portal')).toBe(true);
+  expect(n.startsWith('  q quit  t speed  b bell:on  o portal  v simple')).toBe(true);
   expect(n.endsWith('probes ~1.2 MB/h')).toBe(true);
   const nl = footer(makeSnapshot(), ui({ logStatus: 'off (EACCES)' }), 72)[0] ?? '';
-  expect([visibleWidth(nl), nl.includes('o open portal'), nl.endsWith('log: off (EACCES)')]).toEqual([72, true, true]);
+  expect([visibleWidth(nl), nl.includes('o portal'), nl.endsWith('log: off (EACCES)')]).toEqual([72, true, true]);
   expect(ASCII_RE.test(footer(makeSnapshot(), ui({ logStatus: 'on', footerMsg: 'hi', footerMsgUntil: null }), 100)[0] ?? '')).toBe(true);
 });
 

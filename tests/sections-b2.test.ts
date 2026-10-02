@@ -94,7 +94,7 @@ test('footer sheds the probe rate before the transient message', () => {
   const f80 = footer(makeSnapshot(), ui({ footerMsg: msg, footerMsgUntil: null }), 80)[0] ?? '';
   expect(visibleWidth(f80)).toBe(80);
   expect(f80).toContain(msg);
-  expect(f80).toContain('o open portal');
+  expect(f80).toContain('o portal');
   expect(f80).not.toContain('probes');
   const short = footer(makeSnapshot(), ui({ footerMsg: 'no point testing while down', footerMsgUntil: null }), 80)[0] ?? '';
   expect(short).toContain('no point testing while down');
@@ -103,10 +103,10 @@ test('footer sheds the probe rate before the transient message', () => {
   expect([log.includes(msg), log.endsWith('log: on'), visibleWidth(log)]).toEqual([true, true, 100]);
   // a message too long for the row is cut, never dropped, and the keys stay whole
   const long = footer(makeSnapshot(), ui({ footerMsg: 'opening http://captive.apple.com/hotspot-detect.html', footerMsgUntil: null }), 80)[0] ?? '';
-  expect([long.includes('o open portal'), long.includes('opening http://captive'), visibleWidth(long)]).toEqual([true, true, 80]);
+  expect([long.includes('o portal'), long.includes('opening http://captive'), visibleWidth(long)]).toEqual([true, true, 80]);
   expect(ASCII_RE.test(long)).toBe(true);
-  // no message: the probe rate stays, the size hint is what goes first (§8.2 mockup)
-  expect(footer(makeSnapshot(), ui(), 80)[0]).toContain('t speed test (250 KB)');
+  // no message: the probe rate stays; the size hint is what goes first
+  expect(footer(makeSnapshot(), ui(), 80)[0]).toContain('  t speed test  ');
   expect(footer(makeSnapshot(), ui(), 72)[0]?.endsWith('probes ~1.2 MB/h')).toBe(true);
 });
 
