@@ -8,6 +8,9 @@ expect { timeout {} }
 send "b"
 set timeout 8
 expect { timeout {} }
+send "v"
+set timeout 6
+expect { timeout {} }
 send "q"
 set timeout 15
 expect eof

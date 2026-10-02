@@ -1,21 +1,27 @@
 // §8 TUI frame: sections → layout → one escape string. `frameLines` is pure (used by
-// scripts/render-once.ts); `drawTui` writes through the Tty (4 fps cap inside Tty.write).
+// scripts/render-once.ts) and draws `ui.view` (simple-view spec §2); `drawTui` writes through the Tty.
 import type { Snapshot, UiState } from '../model/types';
 import type { Glyphs } from '../ui/ansi';
 import { composeLines, renderFrame, ruleLine } from '../ui/frame';
 import { planLayout, type Size } from '../ui/layout';
+import { planSimpleLayout } from '../ui/layout-simple';
 import { activities } from '../ui/sections/activities';
 import { banner } from '../ui/sections/banner';
+import { chain } from '../ui/sections/chain';
+import { chart } from '../ui/sections/chart';
+import { chips } from '../ui/sections/chips';
+import { dropSummary } from '../ui/sections/drop-summary';
 import { drops } from '../ui/sections/drops';
 import { footer, tip } from '../ui/sections/footer';
-import { header } from '../ui/sections/header';
+import { header, simpleHeader } from '../ui/sections/header';
 import { metrics } from '../ui/sections/metrics';
 import { path } from '../ui/sections/path';
+import { status } from '../ui/sections/status';
 import { timeline } from '../ui/sections/timeline';
 import type { Tty } from '../ui/tty';
 
-/** Exactly `size.rows` lines, each fitted by frame.ts when rendered. */
-export function frameLines(snap: Snapshot, ui: UiState, size: Size, g: Glyphs, colorOn: boolean): string[] {
+/** The dense §8.1/§8.2 screen. */
+function advancedLines(snap: Snapshot, ui: UiState, size: Size, g: Glyphs, colorOn: boolean): string[] {
   const plan = planLayout(size);
   const w = size.cols;
   const parts = {
@@ -30,6 +36,28 @@ export function frameLines(snap: Snapshot, ui: UiState, size: Size, g: Glyphs, c
     footer: footer(snap, ui, w),
   };
   return composeLines(plan, parts, ruleLine(w, g.rule));
+}
+
+/** The default glance screen (simple-view spec §3–§4); spacer rows are blank. */
+function simpleLines(snap: Snapshot, ui: UiState, size: Size, g: Glyphs, colorOn: boolean): string[] {
+  const plan = planSimpleLayout(size);
+  const w = size.cols;
+  const parts = {
+    header: simpleHeader(snap, w, g, colorOn),
+    status: status(snap, ui, w, g, colorOn),
+    chips: chips(snap, w, g, colorOn),
+    chain: chain(snap, w, g, colorOn),
+    chart: chart(snap, ui, w, plan.chartRows, g, colorOn),
+    timeline: [...timeline(snap, plan, g, colorOn), ...dropSummary(snap, w, g, colorOn)],
+    tip: tip(snap, w),
+    footer: footer(snap, ui, w),
+  };
+  return composeLines(plan, parts, '');
+}
+
+/** Exactly `size.rows` lines, each fitted by frame.ts when rendered. */
+export function frameLines(snap: Snapshot, ui: UiState, size: Size, g: Glyphs, colorOn: boolean): string[] {
+  return ui.view === 'simple' ? simpleLines(snap, ui, size, g, colorOn) : advancedLines(snap, ui, size, g, colorOn);
 }
 
 export function buildFrame(snap: Snapshot, ui: UiState, size: Size, g: Glyphs, colorOn: boolean): string {

@@ -35,3 +35,28 @@ test.skipIf(!hasExpect)('TUI draws frames every second under a pty and quits on 
   expect(out.slice(out.lastIndexOf('\x1b[?1049l'))).toContain('Probe traffic'); // quit report after leaving
   expect(out).not.toContain('\x1b[?1049h\x1b[?25l\x1b[2Jq'); // the key was never echoed (raw mode was on)
 }, 30_000);
+
+test.skipIf(!hasExpect)('v switches from the simple view to the advanced view live', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'netmon-pty-'));
+  const script = join(dir, 'view.exp');
+  writeFileSync(script, [
+    'spawn -noecho bun run src/main.ts --no-bell',
+    'stty rows 30 columns 100 < $spawn_out(slave,name)',
+    'set timeout 3',
+    'expect { timeout {} }',
+    'send "v"',
+    'set timeout 3',
+    'expect { timeout {} }',
+    'send "q"',
+    'set timeout 15',
+    'expect eof',
+    '',
+  ].join('\n'));
+  const proc = Bun.spawn([EXPECT, script], { cwd: ROOT, stdout: 'pipe', stderr: 'pipe', stdin: 'ignore' });
+  const out = await new Response(proc.stdout).text();
+  await proc.exited;
+  const firstAdvanced = out.indexOf('v simple');
+  expect(out.indexOf('v details')).toBeGreaterThanOrEqual(0); // starts in the simple view
+  expect(firstAdvanced).toBeGreaterThan(out.indexOf('v details')); // ...then the advanced footer
+  expect(out).toContain('\x1b[?1049l'); // left the alt screen on q
+}, 30_000);
