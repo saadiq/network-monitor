@@ -61,11 +61,12 @@ function markerText(o: Outage, room: number, arrowRoom: number, g: Glyphs): stri
 
 function markerRow(snap: Snapshot, cells: number, cellMs: number, mins: number, g: Glyphs, on: boolean): string {
   const row = new MarkerRow(cells);
-  row.put(0, `-${mins}m`, null);
   const windowStart = snap.wall - cells * cellMs; // epoch ms of the oldest cell
   const marks = markedOutages(snap)
     .map((o) => ({ o, idx: Math.floor((o.startedAt - windowStart) / cellMs) }))
     .filter((m) => m.idx >= 0 && m.idx < cells);
+  const label = `-${mins}m`;
+  if ((marks[0]?.idx ?? cells) > label.length) row.put(0, label, null); // a marker there wins, whole
   marks.forEach(({ o, idx }, i) => {
     const next = marks[i + 1]?.idx; // the right-most marker owns the rest, up to ` now`
     const room = (next == null ? cells - NOW_ZONE : next - 1) - idx; // a blank cell between markers

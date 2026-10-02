@@ -127,3 +127,11 @@ test('timeline: a marker that loses a collision shrinks to its stamp, never a fr
   expect(r.slice(7, 16)).toBe('▲14:19   '); // full text would run into the 14:21 marker at cell 16
   expect(r.slice(16, 29)).toBe('▲14:21 portal');
 });
+
+test('timeline: a drop in the first cells hides the -15m label instead of leaving a fragment', () => {
+  const plan = { cols: 40, timelineCells: 30, cellMs: 30000 };
+  const r = strip(timeline(makeSnapshot(), plan, G, false)[1] ?? '').slice(10);
+  expect(r).not.toMatch(/-1\d?▲/);
+  expect(r.startsWith('   ▲')).toBe(true);
+  expect(strip(timeline(makeSnapshot(), FULL, G, false)[1] ?? '').slice(10).startsWith('-15m')).toBe(true);
+});
