@@ -17,39 +17,53 @@ export function causeLabel(snap: Snapshot): string | null {
   }
 }
 
-/** `● UP · OK (B)` / `● DOWN · uplink` / `● DEGRADED · dns · OK (B)`. */
-function headSegment(snap: Snapshot, g: Glyphs, on: boolean): string {
-  let s = paint(stateColor(snap.state), `${g.bullet} ${stateWord(snap.state)}`, on);
-  const cause = causeLabel(snap);
-  if (cause) s += ` ${g.sep} ${cause}`;
+const graded = (snap: Snapshot): boolean => snap.state === 'UP' || snap.state === 'DEGRADED';
+
+/** `OK (B)` (`OK (B~)` under load, §4.8) in the grade color; null outside UP/DEGRADED. */
+export function gradeSegment(snap: Snapshot, on: boolean): string | null {
   const gr = snap.grade.grade;
-  if (gr && (snap.state === 'UP' || snap.state === 'DEGRADED')) {
-    const tilde = snap.grade.underLoad ? '~' : ''; // §4.8
-    s += ` ${g.sep} ` + paint(gradeColor(gr), `${GRADE_WORDS[gr]} (${gr}${tilde})`, on);
-  }
-  return s;
+  if (!gr || !graded(snap)) return null;
+  const tilde = snap.grade.underLoad ? '~' : '';
+  return paint(gradeColor(gr), `${GRADE_WORDS[gr]} (${gr}${tilde})`, on);
 }
 
-/** §7.5 line 1 segments in order. */
-export function bannerSegments(snap: Snapshot, g: Glyphs, on: boolean): string[] {
-  const segs = [headSegment(snap, g, on)];
-  if (snap.state === 'UP' || snap.state === 'DEGRADED') {
-    segs.push(`steady ${fmtDuration(snap.steadyFor)}`);
-  } else if (isOffline(snap.state)) {
-    const secs = snap.downFor ?? (snap.now - snap.since) / 1000;
-    segs.push(paint(stateColor(snap.state), `${stateWord(snap.state)} ${fmtClock(secs)}`, on));
-  }
+/** `steady 4m12s` in UP/DEGRADED, the `DOWN 0:42` clock while offline, else null. */
+export function timerSegment(snap: Snapshot, on: boolean): string | null {
+  if (graded(snap)) return `steady ${fmtDuration(snap.steadyFor)}`;
+  if (!isOffline(snap.state)) return null;
+  const secs = snap.downFor ?? (snap.now - snap.since) / 1000;
+  return paint(stateColor(snap.state), `${stateWord(snap.state)} ${fmtClock(secs)}`, on);
+}
+
+/** `getting worse ▲` (yellow) / `getting better ▼` (green), or null. */
+export function trendSegment(snap: Snapshot, g: Glyphs, on: boolean): string | null {
   const t = snap.trend;
-  if (t.phrase && t.overall) {
-    const worse = t.overall === 'worse';
-    segs.push(paint(worse ? 'yellow' : 'green', `${t.phrase} ${worse ? g.up : g.down}`, on));
-  }
-  const n = snap.drops.drops15;
-  if (n > 0) segs.push(`${n} drop${n === 1 ? '' : 's'} in 15m`);
+  if (!t.phrase || !t.overall) return null;
+  const worse = t.overall === 'worse';
+  return paint(worse ? 'yellow' : 'green', `${t.phrase} ${worse ? g.up : g.down}`, on);
+}
+
+/** Trailing qualifiers: FLAKY, satellite offset, under load. */
+export function flagSegments(snap: Snapshot, on: boolean): string[] {
+  const segs: string[] = [];
   if (snap.grade.tags.includes('FLAKY')) segs.push(paint('yellow', 'FLAKY', on));
   if (snap.sat) segs.push(`sat +${snap.rttOffset}ms`);
   if (snap.grade.underLoad) segs.push('~ under load');
   return segs;
+}
+
+/** `● UP · OK (B)` / `● DOWN · uplink` / `● DEGRADED · dns · OK (B)`. */
+function headSegment(snap: Snapshot, g: Glyphs, on: boolean): string {
+  const state = paint(stateColor(snap.state), `${g.bullet} ${stateWord(snap.state)}`, on);
+  return [state, causeLabel(snap), gradeSegment(snap, on)].filter((s) => s !== null).join(` ${g.sep} `);
+}
+
+/** §7.5 line 1 segments in order. */
+export function bannerSegments(snap: Snapshot, g: Glyphs, on: boolean): string[] {
+  const n = snap.drops.drops15;
+  const drops = n > 0 ? `${n} drop${n === 1 ? '' : 's'} in 15m` : null;
+  return [headSegment(snap, g, on), timerSegment(snap, on), trendSegment(snap, g, on), drops, ...flagSegments(snap, on)]
+    .filter((s): s is string => s !== null);
 }
 
 /** Two rows, exactly `w` cells each. */
