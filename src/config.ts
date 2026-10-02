@@ -196,6 +196,7 @@ export const SIMPLE_MIN_ROWS = 10;
 export const CHART_MIN_ROWS = 4; // caption + 3 plot rows
 export const CHART_MAX_ROWS = 14;
 export const TIMELINE_LABEL_W = 10; // ` LAST 15m `
+export const CHIPS_GRID_COLS = 50; // below this the four chips form a 2×2 grid
 export const FLASH_TICKS = 2; // banner inverse after a transition
 export const MAX_FPS = 4;
 export const BELL_COUNTS = { DOWN: 1, NO_LINK: 1, PORTAL: 2, RECOVER: 2 } as const;
