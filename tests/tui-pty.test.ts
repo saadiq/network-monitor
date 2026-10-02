@@ -4,7 +4,7 @@
 // child's output queue fills, and its tcsetattr()/writes stall until expect reads again.
 // Skipped where expect is missing.
 import { expect, test } from 'bun:test';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -28,6 +28,7 @@ test.skipIf(!hasExpect)('TUI draws frames every second under a pty and quits on 
   const proc = Bun.spawn([EXPECT, script], { cwd: ROOT, stdout: 'pipe', stderr: 'pipe', stdin: 'ignore' });
   const out = await new Response(proc.stdout).text();
   await proc.exited;
+  rmSync(dir, { recursive: true, force: true });
   const frames = (out.match(/\x1b\[1;1H/g) ?? []).length;
   expect(frames).toBeGreaterThanOrEqual(3); // ≈ 5 frames in 4 s; 1 means the loop was blocked
   expect(out).toContain('\x1b[?1049h'); // alt screen entered
@@ -36,12 +37,15 @@ test.skipIf(!hasExpect)('TUI draws frames every second under a pty and quits on 
   expect(out).not.toContain('\x1b[?1049h\x1b[?25l\x1b[2Jq'); // the key was never echoed (raw mode was on)
 }, 30_000);
 
-test.skipIf(!hasExpect)('v switches from the simple view to the advanced view live', async () => {
+test.skipIf(!hasExpect)('v switches to the advanced view and back, live', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'netmon-pty-'));
   const script = join(dir, 'view.exp');
   writeFileSync(script, [
     'spawn -noecho bun run src/main.ts --no-bell',
     'stty rows 30 columns 100 < $spawn_out(slave,name)',
+    'set timeout 3',
+    'expect { timeout {} }',
+    'send "v"',
     'set timeout 3',
     'expect { timeout {} }',
     'send "v"',
@@ -55,8 +59,10 @@ test.skipIf(!hasExpect)('v switches from the simple view to the advanced view li
   const proc = Bun.spawn([EXPECT, script], { cwd: ROOT, stdout: 'pipe', stderr: 'pipe', stdin: 'ignore' });
   const out = await new Response(proc.stdout).text();
   await proc.exited;
+  rmSync(dir, { recursive: true, force: true });
   const firstAdvanced = out.indexOf('v simple');
   expect(out.indexOf('v details')).toBeGreaterThanOrEqual(0); // starts in the simple view
   expect(firstAdvanced).toBeGreaterThan(out.indexOf('v details')); // ...then the advanced footer
+  expect(out.indexOf('v details', firstAdvanced)).toBeGreaterThan(firstAdvanced); // ...and back
   expect(out).toContain('\x1b[?1049l'); // left the alt screen on q
 }, 30_000);

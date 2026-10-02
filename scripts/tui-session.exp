@@ -11,6 +11,9 @@ expect { timeout {} }
 send "v"
 set timeout 6
 expect { timeout {} }
+send "v"
+set timeout 4
+expect { timeout {} }
 send "q"
 set timeout 15
 expect eof
