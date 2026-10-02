@@ -2,7 +2,7 @@
 import { fmtHm, truncate, visibleWidth } from '../../core/format';
 import type { CellState, Outage, Snapshot } from '../../model/types';
 import { GLYPHS, cellColor, type ColorName, type Glyphs } from '../ansi';
-import { paint } from './common';
+import { paintRuns } from './common';
 import { timelineBar } from './sparkline';
 
 /** What timeline() reads from the layout plan (a LayoutPlan satisfies it). */
@@ -35,19 +35,7 @@ class MarkerRow {
 
   /** One escape pair per run of equal color. */
   render(on: boolean): string {
-    let out = '';
-    let run = '';
-    let cur: ColorName | null = null;
-    for (let i = 0; i < this.width; i++) {
-      const c = this.colors[i] ?? null;
-      if (c !== cur) {
-        out += paint(cur, run, on);
-        run = '';
-        cur = c;
-      }
-      run += this.chars[i] ?? ' ';
-    }
-    return out + paint(cur, run, on);
+    return paintRuns(this.chars, this.colors, on);
   }
 }
 

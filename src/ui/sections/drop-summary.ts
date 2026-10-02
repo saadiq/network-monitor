@@ -6,7 +6,7 @@ import type { Glyphs } from '../ansi';
 import { LEAD, paint, shedRight } from './common';
 
 /** The summary's segments for this snapshot (empty during an outage with no history). */
-export function dropSegments(snap: Snapshot, on: boolean): string[] {
+function dropSegments(snap: Snapshot, on: boolean): string[] {
   const d = snap.drops;
   const usually = d.dropMedianS == null ? null : `usually ~${fmtDuration(d.dropMedianS)}`;
   const longest = d.dropLongestS == null ? null : `longest ${fmtDuration(d.dropLongestS)}`;
