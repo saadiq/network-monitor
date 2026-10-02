@@ -2,6 +2,7 @@ import { test, expect } from 'bun:test';
 import { chain } from '../src/ui/sections/chain';
 import { glyphs, strip } from '../src/ui/ansi';
 import { visibleWidth } from '../src/core/format';
+import { BIN } from '../src/config';
 import { makeHttp, makeRoute, makeSignals, makeSnapshot, NOW } from './helpers/snapshot';
 
 const G = glyphs(false);
@@ -53,4 +54,17 @@ test('ascii, color off: OK marks and dashes, pure ASCII', () => {
   const [row] = chain(makeSnapshot(), 80, A, false);
   expect(row?.trimEnd()).toBe('  Wi-Fi OK---- Router OK---- Internet OK---- DNS OK---- Web OK');
   expect(ASCII_RE.test(row ?? '')).toBe(true);
+});
+
+test('too narrow even for the last rung: whole hops only, never a cut mark', () => {
+  const [row] = chain(makeSnapshot(), 40, A, false);
+  expect(row?.trimEnd()).toBe('  Wi-Fi OK-Router OK-Inet OK-DNS OK');
+});
+
+test('with nothing failing, the first unknown hop with a reason shows it', () => {
+  const [row] = chain(makeSnapshot({ missingBins: [BIN.dig] }), 80, G, false);
+  expect(row).toContain('DNS ? dig: missing ──── Web ✔');
+  const [both] = chain(makeSnapshot({ missingBins: [BIN.dig], http: makeHttp({ kind: 'portal' }) }), 100, G, false);
+  expect(both).toContain('Web ✘ portal'); // a failure still wins over an unknown
+  expect(both).not.toContain('dig: missing');
 });

@@ -28,30 +28,40 @@ function node(h: Hop, detail: string, abbrev: boolean, g: Glyphs, on: boolean): 
   return `${name} ${dot}${detail ? ' ' + paint(c, detail, on) : ''}`;
 }
 
-/** The row for one ladder rung; `detail` belongs to hop `bad` (the first non-ok one). */
-function render(hops: Hop[], bad: number, detail: string, r: Rung, g: Glyphs, on: boolean): string {
+/**
+ * The row for one ladder rung, stopping before the first hop that would overflow `w` (so a hop is
+ * never cut through its mark); `detail` belongs to hop `bad`.
+ */
+function render(hops: Hop[], bad: number, detail: string, r: Rung, g: Glyphs, on: boolean, w: number): { line: string; whole: boolean } {
   const shown = r.detail ? detail : '';
   let out = LEAD;
-  hops.forEach((h, i) => {
-    if (i > 0) {
-      const afterDetail = i - 1 === bad && shown !== '';
-      out += paint('dim', (afterDetail ? ' ' : '') + g.link.repeat(r.dashes) + (r.space ? ' ' : ''), on);
-    }
-    out += node(h, i === bad ? shown : '', r.abbrev, g, on);
-  });
-  return out;
+  for (const [i, h] of hops.entries()) {
+    const lead = i - 1 === bad && shown !== '' ? ' ' : '';
+    const link = i === 0 ? '' : paint('dim', lead + g.link.repeat(r.dashes) + (r.space ? ' ' : ''), on);
+    const next = out + link + node(h, i === bad ? shown : '', r.abbrev, g, on);
+    if (visibleWidth(next) > w) return { line: out, whole: false };
+    out = next;
+  }
+  return { line: out, whole: true };
+}
+
+/** The hop whose detail is shown: the first failing/shaky one, else the first other non-ok hop with a reason. */
+function detailHop(hops: Hop[]): number {
+  const failing = hops.findIndex(isBad);
+  return failing >= 0 ? failing : hops.findIndex((h) => h.mark !== 'ok' && hopDetail(h, 'compact') !== '');
 }
 
 /** One row, exactly `w` cells. */
 export function chain(snap: Snapshot, w: number, g: Glyphs, on: boolean): string[] {
   const hops = hopList(snap, g);
-  const bad = hops.findIndex(isBad);
+  const bad = detailHop(hops);
   const badHop = hops[bad];
   const detail = badHop ? hopDetail(badHop, 'compact') : '';
   let line = LEAD;
   for (const r of LADDER) {
-    line = render(hops, bad, detail, r, g, on);
-    if (visibleWidth(line) <= w) break;
+    const res = render(hops, bad, detail, r, g, on, w);
+    line = res.line;
+    if (res.whole) break;
   }
   return [fit(line, w)];
 }
