@@ -16,7 +16,7 @@ const snap = makeSnapshot();
 snap.banner = bannerLines(snap, g);
 snap.tip = pickTip(snap, g);
 const ui: UiState = {
-  bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null, lastSpeed: null, speedRunning: false, logStatus: null,
+  view: 'advanced', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null, lastSpeed: null, speedRunning: false, logStatus: null,
 };
 
 for (const size of [{ cols: 100, rows: 30 }, { cols: 80, rows: 24 }] as Size[]) {

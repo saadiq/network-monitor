@@ -8,7 +8,7 @@ const env = (extra: Record<string, string | undefined> = {}) => ({ env: { HOME, 
 test('defaults (§12)', () => {
   expect(parseArgs([], env())).toEqual({
     target: '1.1.1.1', iface: null, log: null, portalUrl: null,
-    plain: false, ascii: false, color: true, bell: true, help: false,
+    plain: false, advanced: false, ascii: false, color: true, bell: true, help: false,
   });
 });
 

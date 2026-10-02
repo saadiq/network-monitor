@@ -68,3 +68,9 @@ export function bellAction(ctx: ActionCtx): void {
   ctx.ui.bellOn = ctx.alerter.toggle();
   ctx.redraw();
 }
+
+/** `v`: switch between the simple and advanced views (simple-view spec §2); repaints at once. */
+export function viewAction(ctx: Pick<ActionCtx, 'ui' | 'redraw'>): void {
+  ctx.ui.view = ctx.ui.view === 'simple' ? 'advanced' : 'simple';
+  ctx.redraw();
+}

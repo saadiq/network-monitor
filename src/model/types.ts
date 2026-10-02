@@ -97,7 +97,11 @@ export interface GradeInfo {
 export type CellState = 'UP' | 'DEGRADED' | 'PORTAL' | 'DOWN' | 'NO_LINK' | 'GAP' | 'WARMUP';
 
 /** UI-only state owned by main/tty, passed to banner/footer alongside the Snapshot. */
+/** Which TUI screen is drawn (simple-view spec §2): 'simple' by default, 'advanced' with --advanced; `v` toggles. */
+export type View = 'simple' | 'advanced';
+
 export interface UiState {
+  view: View;
   bellOn: boolean;
   flashTicksLeft: number; // > 0 → banner rendered inverse (§8.1)
   footerMsg: string | null; // transient footer message (e.g. speed test refusal)

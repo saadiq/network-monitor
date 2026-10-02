@@ -84,7 +84,7 @@ export function makeSnapshot(over: Partial<Snapshot> = {}): Snapshot {
 
 export function ui(over: Partial<UiState> = {}): UiState {
   return {
-    bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null, lastSpeed: null,
+    view: 'advanced', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null, lastSpeed: null,
     speedRunning: false, logStatus: null, ...over,
   };
 }

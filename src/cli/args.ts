@@ -65,7 +65,7 @@ function noColorEnv(env: Record<string, string | undefined>): boolean {
 }
 
 const BOOL_FLAGS: Readonly<Record<string, keyof Options>> = {
-  '--plain': 'plain', '--ascii': 'ascii', '--help': 'help', '-h': 'help',
+  '--plain': 'plain', '--advanced': 'advanced', '--ascii': 'ascii', '--help': 'help', '-h': 'help',
 };
 
 export function parseArgs(argv: string[], pe: ParseEnv = {}): Options {
@@ -73,7 +73,7 @@ export function parseArgs(argv: string[], pe: ParseEnv = {}): Options {
   const home = env['HOME'] || homedir();
   const o: Options = {
     target: DEFAULT_TARGET, iface: null, log: null, portalUrl: null,
-    plain: false, ascii: false, color: !noColorEnv(env), bell: true, help: false,
+    plain: false, advanced: false, ascii: false, color: !noColorEnv(env), bell: true, help: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i] ?? '';
@@ -81,7 +81,7 @@ export function parseArgs(argv: string[], pe: ParseEnv = {}): Options {
     const boolKey = BOOL_FLAGS[name];
     if (boolKey !== undefined || name === '--no-color' || name === '--no-bell') {
       if (inline !== null) throw new ArgsError(`${name} does not take a value`);
-      if (boolKey === 'plain' || boolKey === 'ascii' || boolKey === 'help') o[boolKey] = true;
+      if (boolKey === 'plain' || boolKey === 'advanced' || boolKey === 'ascii' || boolKey === 'help') o[boolKey] = true;
       else if (name === '--no-color') o.color = false;
       else o.bell = false;
       continue;
@@ -121,12 +121,13 @@ export function usage(): string {
     '  --log [path]         write JSONL (default path ~/netmon-YYYYMMDD-HHMM.jsonl)',
     '  --portal-url <url>   URL for the o key when no redirect was captured',
     '  --plain              one status line per second, no full-screen UI',
+    '  --advanced           start in the detailed view (default: the simple view)',
     '  --ascii              ASCII glyphs instead of Unicode',
     '  --no-color           no ANSI colors (NO_COLOR env also respected)',
     '  --no-bell            start with the bell off',
     '  --help',
     '',
-    'Keys: q quit · t speed test (250 KB) · b bell on/off · o open portal',
+    'Keys: q quit · t speed test (250 KB) · b bell on/off · o open portal · v simple/advanced view',
     '',
   ].join('\n');
 }

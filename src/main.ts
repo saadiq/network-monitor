@@ -1,6 +1,6 @@
 // Entry (§13): parseArgs → preflight → Store + probes + ticker → TUI or plain → idempotent shutdown.
 // The only module that touches every side-effecting package.
-import { bellAction, FOOTER_MSG_MS, portalAction, speedAction, type ActionCtx } from './app/actions';
+import { bellAction, FOOTER_MSG_MS, portalAction, speedAction, viewAction, type ActionCtx } from './app/actions';
 import { Probes } from './app/probes';
 import { drawTui } from './app/render';
 import { Alerter } from './actions/alerts';
@@ -101,6 +101,7 @@ function enterTui(tty: Tty, ctx: ActionCtx): void {
     speed: () => void speedAction(ctx),
     bell: () => bellAction(ctx),
     portal: () => void portalAction(ctx),
+    view: () => viewAction(ctx),
   });
 }
 
@@ -117,6 +118,7 @@ export async function main(): Promise<void> {
   const startedWall = wallNow();
   const store = new Store({ target: opts.target, now: startedAt, wall: startedWall, ascii: opts.ascii, missingBins: [...missing] });
   const ui: UiState = {
+    view: opts.advanced ? 'advanced' : 'simple',
     bellOn: opts.bell, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null,
     lastSpeed: null, speedRunning: false, logStatus: null,
   };

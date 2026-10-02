@@ -5,6 +5,7 @@ export interface KeyActions {
   speed(): void; // t — 250 KB speed test (rate limit / state refusal decided by the action)
   bell(): void; // b — toggle bell
   portal(): void; // o — open the portal URL
+  view(): void; // v — switch simple/advanced view
 }
 
 /** Anything with Tty's onKey; kept minimal so tests need no terminal. */
@@ -15,6 +16,7 @@ export const KEY_CTRL_C = '\x03';
 export const KEY_SPEED = 't';
 export const KEY_BELL = 'b';
 export const KEY_PORTAL = 'o';
+export const KEY_VIEW = 'v';
 
 /** Run the action for `key`; returns false for unbound keys (ignored, §8.4). */
 export function dispatchKey(key: string, actions: KeyActions): boolean {
@@ -31,6 +33,9 @@ export function dispatchKey(key: string, actions: KeyActions): boolean {
       return true;
     case KEY_PORTAL:
       actions.portal();
+      return true;
+    case KEY_VIEW:
+      actions.view();
       return true;
     default:
       return false;

@@ -16,7 +16,7 @@ const C80 = planLayout({ cols: 80, rows: 24 });
 const C72 = planLayout({ cols: 72, rows: 18 });
 
 const ui = (o: Partial<UiState> = {}): UiState =>
-  ({ bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null, lastSpeed: null, speedRunning: false, logStatus: null, ...o });
+  ({ view: 'advanced', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null, lastSpeed: null, speedRunning: false, logStatus: null, ...o });
 
 const cells = (row: string): string[] => [2, 26, 50, 74].map((i) => strip(row).slice(i, i + 24));
 

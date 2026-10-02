@@ -14,7 +14,7 @@ const NO_STREAMS: StreamHealth = { inetStalled: true, gwStalled: true, gwActive:
 
 const OPTS: Options = {
   target: '1.1.1.1', iface: null, log: null, portalUrl: null,
-  plain: false, ascii: false, color: false, bell: false, help: false,
+  plain: false, advanced: false, ascii: false, color: false, bell: false, help: false,
 };
 
 const route = (over: Partial<RouteInfo> = {}): RouteInfo => ({
