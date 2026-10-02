@@ -6,7 +6,7 @@ import { GLYPHS, color, type Glyphs } from '../ansi';
 import { LEAD, gradeColor, paint, stateColor, stateWord } from './common';
 
 /** Second token after the state word for non-graded causes (`DOWN · uplink`). */
-function causeLabel(snap: Snapshot): string | null {
+export function causeLabel(snap: Snapshot): string | null {
   switch (snap.cause) {
     case 'uplink': case 'router': case 'dns': case 'web': return snap.cause;
     case 'wifi': return 'wi-fi';

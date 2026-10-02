@@ -1,4 +1,5 @@
 // Shared helpers for the UI sections (§8.1 glyph/color rules). Pure.
+import { truncate, visibleWidth } from '../../core/format';
 import type { Grade, State, VerdictLevel } from '../../model/types';
 import { color, type ColorName, type Glyphs } from '../ansi';
 
@@ -67,4 +68,21 @@ export function levelMark(level: VerdictLevel): Mark {
 /** color() that accepts a null color (= plain). */
 export function paint(c: ColorName | null, s: string, on: boolean): string {
   return c ? color(c, s, on) : s;
+}
+
+/** Whole segments from the left, joined by sep, while they fit in w (the first is always kept). */
+export function shedRight(segs: string[], sep: string, w: number): string {
+  let out = '';
+  for (const [i, s] of segs.entries()) {
+    const next = i === 0 ? s : out + sep + s;
+    if (i > 0 && visibleWidth(next) > w) break;
+    out = next;
+  }
+  return out;
+}
+
+/** Cut to w cells, ending in the ellipsis glyph when anything was cut. */
+export function ellipsize(s: string, w: number, g: Glyphs): string {
+  if (visibleWidth(s) <= w) return s;
+  return truncate(s, Math.max(0, w - visibleWidth(g.ellipsis))) + g.ellipsis;
 }
