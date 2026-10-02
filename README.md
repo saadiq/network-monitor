@@ -4,6 +4,11 @@ A terminal dashboard for the one question that matters when the connection gets 
 
 It is built for any link you don't control: home and office Wi-Fi, hotel and café networks, a phone tether, and in-flight Wi-Fi — the captive-portal-gated, drop-every-few-minutes kind of connection that motivated it in the first place.
 
+<p align="center">
+  <img src="docs/screenshot.png" width="872" alt="netmon's simple view: a green UP badge with grade OK (B), activity chips (chat and browse OK, video call shaky, download no), the Wi-Fi → Router → Internet → DNS → Web chain, a latency bar chart with two spikes, and a 15-minute timeline marking three drops">
+</p>
+<p align="center"><sub>The default simple view (mock data). Press <code>v</code> for the advanced view with every number.</sub></p>
+
 ## Requirements
 
 - macOS (uses `ping`, `route`, `scutil`, `networksetup`, `system_profiler`, `dig`, `curl`, `netstat` — all read-only, no admin rights)
