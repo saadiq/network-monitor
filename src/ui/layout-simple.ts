@@ -1,11 +1,9 @@
 // Simple-view layout (simple-view spec §3). Pure: terminal size in, section placement out.
 import {
-  CHART_MAX_ROWS, CHART_MIN_ROWS, FULL_COLS, SIMPLE_MIN_COLS, SIMPLE_MIN_ROWS, TIMELINE_FULL,
+  CHART_MAX_ROWS, CHART_MIN_ROWS, SIMPLE_MIN_COLS, SIMPLE_MIN_ROWS, TIMELINE_FULL,
   TIMELINE_LABEL_W, WIN_HISTORY_MS,
 } from '../config';
-import type { LayoutPlan, Size } from './layout';
-
-type SimpleId = 'header' | 'status' | 'chips' | 'chain' | 'chart' | 'timeline' | 'tip' | 'footer';
+import type { LayoutPlan, SimpleId, Size } from './layout';
 
 const NEED: Readonly<Record<SimpleId, number>> = {
   header: 1, status: 2, chips: 2, chain: 1, chart: CHART_MIN_ROWS, timeline: 3, tip: 1, footer: 1,
@@ -29,18 +27,17 @@ export function planSimpleLayout(size: Size): LayoutPlan {
   const tooSmall = cols < SIMPLE_MIN_COLS || rows < SIMPLE_MIN_ROWS;
   const tl = simpleTimeline(cols);
   const plan: LayoutPlan = {
-    view: 'simple', cols, rows, tooSmall, compact: cols < FULL_COLS, sections: [], slots: [], rules: [],
-    timelineCells: tl.cells, cellMs: tl.cellMs, activitiesRows: 0, dropsRows: 0, chartRows: 0,
+    view: 'simple', cols, rows, tooSmall, compact: false, sections: [], slots: [], rules: [],
+    timelineCells: tl.cells, cellMs: tl.cellMs, activitiesRows: 0, dropsRows: 0,
   };
   if (tooSmall) return plan;
 
-  const need: Record<SimpleId, number> = { ...NEED };
   const placed = new Set<SimpleId>();
   let free = rows;
   for (const id of PRIORITY) {
-    if (need[id] <= free) {
+    if (NEED[id] <= free) {
       placed.add(id);
-      free -= need[id];
+      free -= NEED[id];
     }
   }
   const spacerAfter = new Set<SimpleId>();
@@ -50,11 +47,7 @@ export function planSimpleLayout(size: Size): LayoutPlan {
     spacerAfter.add(id);
     free -= 1;
   }
-  if (placed.has('chart')) {
-    const grow = Math.min(free, CHART_MAX_ROWS - CHART_MIN_ROWS);
-    need.chart += grow;
-    free -= grow;
-  }
+  const chartRows = CHART_MIN_ROWS + Math.min(free, CHART_MAX_ROWS - CHART_MIN_ROWS); // leftover rows
 
   let row = 1;
   for (const id of DISPLAY) {
@@ -63,11 +56,11 @@ export function planSimpleLayout(size: Size): LayoutPlan {
       plan.slots.push({ id, row: rows, rows: 1 });
       continue;
     }
-    plan.slots.push({ id, row, rows: need[id] });
-    row += need[id];
+    const n = id === 'chart' ? chartRows : NEED[id];
+    plan.slots.push({ id, row, rows: n });
+    row += n;
     if (spacerAfter.has(id)) plan.rules.push(row++);
   }
   plan.sections = plan.slots.map((s) => s.id);
-  plan.chartRows = placed.has('chart') ? need.chart : 0;
   return plan;
 }

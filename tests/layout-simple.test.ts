@@ -14,8 +14,10 @@ function expectSane(plan: LayoutPlan): void {
   expect(new Set(occ).size).toBe(occ.length);
   for (const r of occ) expect(r >= 1 && r <= plan.rows).toBe(true);
   expect(slotFor(plan, 'footer')?.row).toBe(plan.rows);
-  expect(plan.chartRows).toBeLessThanOrEqual(14);
+  expect(chartRows(plan)).toBeLessThanOrEqual(14);
 }
+
+const chartRows = (p: LayoutPlan): number => slotFor(p, 'chart')?.rows ?? 0;
 
 const ALL = ['header', 'status', 'chips', 'chain', 'chart', 'timeline', 'tip', 'footer'];
 
@@ -23,7 +25,7 @@ test('80x24: every section, six spacers, chart 7', () => {
   const p = planSimpleLayout({ cols: 80, rows: 24 });
   expect([p.view, p.tooSmall]).toEqual(['simple', false]);
   expect(p.sections).toEqual(ALL);
-  expect(p.chartRows).toBe(7);
+  expect(chartRows(p)).toBe(7);
   expect(p.rules).toEqual([2, 5, 8, 10, 18, 22]);
   expect(slotFor(p, 'chart')).toEqual({ id: 'chart', row: 11, rows: 7 });
   expect(slotFor(p, 'timeline')).toEqual({ id: 'timeline', row: 19, rows: 3 });
@@ -32,7 +34,7 @@ test('80x24: every section, six spacers, chart 7', () => {
 
 test('100x30: chart takes the leftover rows (13)', () => {
   const p = planSimpleLayout({ cols: 100, rows: 30 });
-  expect(p.chartRows).toBe(13);
+  expect(chartRows(p)).toBe(13);
   expect(p.rules).toEqual([2, 5, 8, 10, 24, 28]);
   expectSane(p);
 });
@@ -40,20 +42,20 @@ test('100x30: chart takes the leftover rows (13)', () => {
 test('60x15: chart at its minimum, no spacers', () => {
   const p = planSimpleLayout({ cols: 60, rows: 15 });
   expect(p.sections).toEqual(ALL);
-  expect([p.chartRows, p.rules]).toEqual([4, []]);
+  expect([chartRows(p), p.rules]).toEqual([4, []]);
   expectSane(p);
 });
 
 test('40x10: no chart, no tip, no spacers', () => {
   const p = planSimpleLayout({ cols: 40, rows: 10 });
   expect(p.sections).toEqual(['header', 'status', 'chips', 'chain', 'timeline', 'footer']);
-  expect([p.chartRows, p.rules]).toEqual([0, []]);
+  expect([chartRows(p), p.rules]).toEqual([0, []]);
   expectSane(p);
 });
 
 test('160x50: chart capped at 14, the rest stays blank above the footer', () => {
   const p = planSimpleLayout({ cols: 160, rows: 50 });
-  expect(p.chartRows).toBe(14);
+  expect(chartRows(p)).toBe(14);
   expect(slotFor(p, 'tip')?.row).toBe(30);
   expectSane(p);
 });
@@ -69,7 +71,7 @@ test('below 40x10 only the message is shown', () => {
 
 test('advanced plan: view advanced, no chart; its too-small message points at v', () => {
   const p = planLayout({ cols: 60, rows: 15 });
-  expect([p.view, p.chartRows, p.tooSmall]).toEqual(['advanced', 0, true]);
+  expect([p.view, chartRows(p), p.tooSmall]).toEqual(['advanced', 0, true]);
   expect(tooSmallMessage(p)).toBe('details need 72x18 (have 60x15); press v');
 });
 

@@ -6,13 +6,11 @@ import type { View } from '../model/types';
 
 export interface Size { cols: number; rows: number }
 
-export type SectionId =
-  | 'header' | 'banner' | 'activities' | 'path' | 'footer'
-  | 'timeline' | 'metrics' | 'drops' | 'tip'
-  | 'status' | 'chips' | 'chain' | 'chart'; // simple view (simple-view spec §3)
-
-/** The sections of the advanced (§8.1/§8.2) screen. */
-type AdvancedId = Exclude<SectionId, 'status' | 'chips' | 'chain' | 'chart'>;
+/** Sections of the advanced (§8.1/§8.2) screen. */
+export type AdvancedId = 'header' | 'banner' | 'activities' | 'path' | 'footer' | 'timeline' | 'metrics' | 'drops' | 'tip';
+/** Sections of the simple screen (simple-view spec §3). */
+export type SimpleId = 'header' | 'status' | 'chips' | 'chain' | 'chart' | 'timeline' | 'tip' | 'footer';
+export type SectionId = AdvancedId | SimpleId;
 
 /** One placed section: 1-based start row and the rows it owns. */
 export interface Slot { id: SectionId; row: number; rows: number }
@@ -21,8 +19,8 @@ export interface LayoutPlan {
   view: View; // which screen this plan is for
   cols: number;
   rows: number;
-  tooSmall: boolean; // < 72×18: frame is only tooSmallMessage()
-  compact: boolean; // < 100 cols or < 27 rows (§8.2 variants of metrics/path)
+  tooSmall: boolean; // below the view's minimum: frame is only tooSmallMessage()
+  compact: boolean; // < 100 cols or < 27 rows (§8.2 variants of metrics/path); false in the simple view
   sections: SectionId[]; // placed sections, top → bottom
   slots: Slot[]; // same order, with row positions
   rules: number[]; // 1-based rows holding a rule line
@@ -30,7 +28,6 @@ export interface LayoutPlan {
   cellMs: number; // 10 s / 15 s
   activitiesRows: number; // 1 at ≥ 100 cols, else 2; 0 when not placed
   dropsRows: number; // 4, or 3 at < 27 rows; 0 when not placed
-  chartRows: number; // simple view: caption + plot rows; 0 otherwise
 }
 
 /** §8.2 placement priority: a section is placed when its rows still fit. */
@@ -68,7 +65,7 @@ export function planLayout(size: Size): LayoutPlan {
   const tl = cols >= FULL_COLS ? TIMELINE_FULL : TIMELINE_COMPACT;
   const plan: LayoutPlan = {
     view: 'advanced', cols, rows, tooSmall, compact, sections: [], slots: [], rules: [],
-    timelineCells: tl.cells, cellMs: tl.cellMs, activitiesRows: 0, dropsRows: 0, chartRows: 0,
+    timelineCells: tl.cells, cellMs: tl.cellMs, activitiesRows: 0, dropsRows: 0,
   };
   if (tooSmall) return plan;
 
@@ -110,7 +107,7 @@ export function slotFor(plan: LayoutPlan, id: SectionId): Slot | null {
   return plan.slots.find((s) => s.id === id) ?? null;
 }
 
-/** The single-line frame below a view's minimum (§8.2; simple-view spec §3). ASCII; ≤ 40 cells. */
+/** The single-line frame below a view's minimum (§8.2; simple-view spec §3). ASCII; composeLines cuts it to cols. */
 export function tooSmallMessage(p: Size & { view?: View }): string {
   if (p.view === 'simple') return `too small (need ${SIMPLE_MIN_COLS}x${SIMPLE_MIN_ROWS})`;
   return `details need ${MIN_COLS}x${MIN_ROWS} (have ${p.cols}x${p.rows}); press v`;

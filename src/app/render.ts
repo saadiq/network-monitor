@@ -3,7 +3,7 @@
 import type { Snapshot, UiState } from '../model/types';
 import type { Glyphs } from '../ui/ansi';
 import { composeLines, renderFrame, ruleLine } from '../ui/frame';
-import { planLayout, type Size } from '../ui/layout';
+import { planLayout, slotFor, type Size } from '../ui/layout';
 import { planSimpleLayout } from '../ui/layout-simple';
 import { activities } from '../ui/sections/activities';
 import { banner } from '../ui/sections/banner';
@@ -47,7 +47,7 @@ function simpleLines(snap: Snapshot, ui: UiState, size: Size, g: Glyphs, colorOn
     status: status(snap, ui, w, g, colorOn),
     chips: chips(snap, w, g, colorOn),
     chain: chain(snap, w, g, colorOn),
-    chart: chart(snap, ui, w, plan.chartRows, g, colorOn),
+    chart: chart(snap, ui, w, slotFor(plan, 'chart')?.rows ?? 0, g, colorOn),
     timeline: [...timeline(snap, plan, g, colorOn), ...dropSummary(snap, w, g, colorOn)],
     tip: tip(snap, w),
     footer: footer(snap, ui, w),
