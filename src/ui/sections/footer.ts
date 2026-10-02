@@ -2,7 +2,7 @@
 // The keys depend on the view (simple-view spec §4).
 import { FULL_COLS, SPEED_BYTES } from '../../config';
 import { fmtBytes, truncate, visibleWidth } from '../../core/format';
-import type { Snapshot, UiState, View } from '../../model/types';
+import type { Snapshot, UiState } from '../../model/types';
 import { LEAD } from './common';
 
 const MIN_GAP = 2; // between the keys and the right-aligned probe rate
@@ -18,16 +18,16 @@ export function tip(snap: Snapshot, w: number): string[] {
 type KeyLevel = 'hint' | 'plain' | 'short';
 const LEVELS: readonly KeyLevel[] = ['hint', 'plain', 'short'];
 
-function speedKey(ui: UiState, level: KeyLevel, view: View): string {
+function speedKey(ui: UiState, level: KeyLevel): string {
   const label = level === 'short' ? 't speed' : 't speed test';
   if (ui.speedRunning) return `${label} (running)`;
-  return level === 'hint' && view === 'advanced' ? `${label} (${Math.round(SPEED_BYTES / 1000)} KB)` : label;
+  return level === 'hint' && ui.view === 'advanced' ? `${label} (${Math.round(SPEED_BYTES / 1000)} KB)` : label;
 }
 
 /** §8.4 keys with live states for the current view (simple-view spec §4). */
 function keyParts(snap: Snapshot, ui: UiState, level: KeyLevel): string[] {
   const bell = `b bell:${ui.bellOn ? 'on' : 'off'}`;
-  const t = speedKey(ui, level, ui.view);
+  const t = speedKey(ui, level);
   if (ui.view === 'simple') return [...(snap.state === 'PORTAL' ? ['o login'] : []), 'v details', t, bell, 'q quit'];
   return ['q quit', t, bell, level === 'short' ? 'o portal' : 'o open portal', 'v simple'];
 }
@@ -38,8 +38,13 @@ function footerMsg(snap: Snapshot, ui: UiState): string | null {
   return ui.footerMsg;
 }
 
+/** Cells the right-hand text takes, including the gap before it (none when there is no text). */
+function rightWidth(right: string): number {
+  return right ? MIN_GAP + visibleWidth(right) : 0;
+}
+
 function fits(left: string, right: string, w: number): boolean {
-  return visibleWidth(left) + (right ? MIN_GAP + visibleWidth(right) : 0) <= w;
+  return visibleWidth(left) + rightWidth(right) <= w;
 }
 
 /** Keys (+ the transient message when one is given), joined by the layout gap. */
@@ -52,7 +57,7 @@ function keysRow(snap: Snapshot, ui: UiState, gap: string, level: KeyLevel, msg:
  * null when too little is left for it to mean anything.
  */
 function cutMsg(bare: string, gap: string, msg: string, right: string, w: number): string | null {
-  const room = w - visibleWidth(bare) - gap.length - (right ? MIN_GAP + visibleWidth(right) : 0);
+  const room = w - visibleWidth(bare) - gap.length - rightWidth(right);
   if (room < MIN_MSG_W) return null;
   return truncate(msg, room - CUT.length) + CUT;
 }
@@ -62,24 +67,20 @@ function cutMsg(bare: string, gap: string, msg: string, right: string, w: number
  * is shed before labels are squeezed; without one, labels are squeezed first (§8.4, §10).
  */
 function halves(snap: Snapshot, ui: UiState, gap: string, msg: string | null, rights: string[], w: number): [string, string] {
-  const tries: [KeyLevel, string][] = msg
-    ? LEVELS.flatMap((l) => rights.map((r): [KeyLevel, string] => [l, r]))
-    : rights.flatMap((r) => LEVELS.map((l): [KeyLevel, string] => [l, r]));
+  const tries = msg
+    ? LEVELS.flatMap((l) => rights.map((r) => [l, r] as const))
+    : rights.flatMap((r) => LEVELS.map((l) => [l, r] as const));
   for (const [level, right] of tries) {
     const left = keysRow(snap, ui, gap, level, msg);
     if (fits(left, right, w)) return [left, right];
   }
   const bare = keysRow(snap, ui, gap, 'short', null);
   const last = rights[rights.length - 1] ?? '';
-  if (msg) {
-    const cut = cutMsg(bare, gap, msg, last, w);
-    if (cut) return [bare + gap + cut, last];
-    // no room beside the keys (narrow simple view): the message alone, until it expires
-    const room = w - LEAD.length - (last ? MIN_GAP + visibleWidth(last) : 0);
-    return [LEAD + truncate(msg, Math.max(0, room)), last];
-  }
-  for (const right of rights) if (fits(bare, right, w)) return [bare, right];
-  return [bare, last];
+  if (!msg) return [bare, last]; // every combination was tried above; footer() cuts the keys
+  const cut = cutMsg(bare, gap, msg, last, w);
+  if (cut) return [bare + gap + cut, last];
+  // too little room beside the keys: the message replaces them until it expires
+  return [LEAD + truncate(msg, Math.max(0, w - LEAD.length - rightWidth(last))), last];
 }
 
 /**
@@ -101,10 +102,7 @@ export function footer(snap: Snapshot, ui: UiState, w: number): string[] {
   else if (probes) rights = msg ? [probes, ''] : [probes];
   else rights = [''];
   const [row, right] = halves(snap, ui, gap, msg, rights, w);
-  let left = row;
-  const rw = visibleWidth(right);
-  const minGap = rw > 0 ? MIN_GAP : 0; // nothing on the right (simple view): no gap to keep
-  if (visibleWidth(left) + minGap + rw > w) left = truncate(left, Math.max(0, w - rw - minGap));
-  const pad = Math.max(minGap, w - visibleWidth(left) - rw);
+  const left = truncate(row, Math.max(0, w - rightWidth(right)));
+  const pad = Math.max(0, w - visibleWidth(left) - visibleWidth(right));
   return [truncate(left + ' '.repeat(pad) + right, w)];
 }
