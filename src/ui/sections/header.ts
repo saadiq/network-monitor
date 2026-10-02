@@ -37,8 +37,9 @@ export function header(snap: Snapshot, w: number, g: Glyphs = GLYPHS.unicode, co
 
 /** Simple view (simple-view spec §4): ` netmon  Wi-Fi (en1) · vpn`, clock right-aligned. */
 export function simpleHeader(snap: Snapshot, w: number, g: Glyphs = GLYPHS.unicode, colorOn = true): string[] {
-  const iface = snap.route?.egressIface ?? g.em;
-  const link = snap.wifiStatus === 'off' ? iface : `Wi-Fi (${iface})`;
+  const r = snap.route;
+  // the Wi-Fi interface, not the VPN tunnel (utunN) that egresses under a full-tunnel VPN
+  const link = snap.wifiStatus === 'off' ? (r?.egressIface ?? g.em) : `Wi-Fi (${r?.wifiIface ?? r?.egressIface ?? g.em})`;
   const left = ' ' + color('bold', 'netmon', colorOn) + '  ' + link + (snap.vpn ? ` ${g.sep} vpn` : '');
   const right = fmtTime(snap.wall);
   const gap = Math.max(1, w - visibleWidth(left) - visibleWidth(right));

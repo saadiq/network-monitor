@@ -64,6 +64,11 @@ test('simpleHeader: name, link and clock only', () => {
   const [eth] = simpleHeader(makeSnapshot({ wifiStatus: 'off', route: makeRoute({ egressIface: 'en7' }) }), 80, G, false);
   expect(eth?.startsWith(' netmon  en7 ')).toBe(true);
   expect(eth).not.toContain('Wi-Fi');
-  const [vpn] = simpleHeader(makeSnapshot({ vpn: true }), 80, G, false);
+  const [vpn] = simpleHeader(makeSnapshot({ vpn: true, route: makeRoute({ egressIface: 'utun4', wifiIface: 'en1', vpn: true }) }), 80, G, false);
   expect(vpn).toContain('Wi-Fi (en1) · vpn');
+});
+
+test('simpleHeader names the Wi-Fi interface, not the VPN tunnel or a missing egress', () => {
+  const [noRoute] = simpleHeader(makeSnapshot({ route: makeRoute({ hasRoute: false, egressIface: null, wifiIface: 'en1' }) }), 80, G, false);
+  expect(noRoute?.startsWith(' netmon  Wi-Fi (en1)')).toBe(true);
 });
