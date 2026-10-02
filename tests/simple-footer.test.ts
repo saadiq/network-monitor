@@ -38,3 +38,16 @@ test('advanced footer gains v simple and keeps it at 72 cols', () => {
   expect(a.startsWith('  q quit  t speed  b bell:on  o portal  v simple')).toBe(true);
   expect(a.endsWith('probes ~1.2 MB/h')).toBe(true);
 });
+
+test('a footer too narrow for every key drops whole keys, never q quit', () => {
+  const portal = f(40, {}, makeSnapshot({ state: 'PORTAL' })).trimEnd();
+  expect(portal).toBe('  o login  v details  t speed  q quit');
+  expect(f(40, { speedRunning: true }).trimEnd()).toBe('  v details  t speed (running)  q quit');
+  const adv = footer(makeSnapshot(), ui({ view: 'advanced', speedRunning: true }), 72)[0] ?? '';
+  expect(adv.startsWith('  q quit  t speed (running)  o portal  v simple')).toBe(true);
+});
+
+test('a message shown alone is marked as cut when it does not fit', () => {
+  const m = f(40, { footerMsg: 'opening http://captive.apple.com/hotspot-detect.html', footerMsgUntil: null });
+  expect(m.trimEnd()).toBe('  opening http://captive.apple.com/ho...');
+});

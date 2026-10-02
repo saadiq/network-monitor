@@ -62,6 +62,18 @@ function cutMsg(bare: string, gap: string, msg: string, right: string, w: number
   return truncate(msg, room - CUT.length) + CUT;
 }
 
+/** Keys dropped one at a time, least useful first, when even the short labels do not fit; q stays. */
+const SHED: readonly string[] = ['b ', 't ', 'v ', 'o '];
+
+function shedKeys(parts: string[], gap: string, right: string, w: number): string {
+  let kept = parts;
+  for (const key of SHED) {
+    if (fits(LEAD + kept.join(gap), right, w)) break;
+    kept = kept.filter((p) => !p.startsWith(key));
+  }
+  return LEAD + kept.join(gap);
+}
+
 /**
  * Left/right halves of the row: the first combination that fits. With a message the right side
  * is shed before labels are squeezed; without one, labels are squeezed first (§8.4, §10).
@@ -76,11 +88,12 @@ function halves(snap: Snapshot, ui: UiState, gap: string, msg: string | null, ri
   }
   const bare = keysRow(snap, ui, gap, 'short', null);
   const last = rights[rights.length - 1] ?? '';
-  if (!msg) return [bare, last]; // every combination was tried above; footer() cuts the keys
+  if (!msg) return [shedKeys(keyParts(snap, ui, 'short'), gap, last, w), last];
   const cut = cutMsg(bare, gap, msg, last, w);
   if (cut) return [bare + gap + cut, last];
   // too little room beside the keys: the message replaces them until it expires
-  return [LEAD + truncate(msg, Math.max(0, w - LEAD.length - rightWidth(last))), last];
+  const room = Math.max(0, w - LEAD.length - rightWidth(last));
+  return [LEAD + (visibleWidth(msg) <= room ? msg : truncate(msg, Math.max(0, room - CUT.length)) + CUT), last];
 }
 
 /**
