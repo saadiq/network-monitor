@@ -59,7 +59,7 @@ Resulting allocations: 40×10 → no chart, no tip, no spacers; 60×15 → chart
 80×24 → chart 7, all six spacers; 100×30 → chart 13; 160×50 → chart 14, rest blank.
 
 The advanced view keeps 72×18 as its minimum; below that it shows
-`need 72x18 for details (have CxR) · v: simple view`.
+`details need 72x18 (have CxR); press v`.
 
 ### 3.1 Mockups (colors described in §5)
 
@@ -86,7 +86,7 @@ The advanced view keeps 72×18 as its minimum; below that it shows
 
  LAST 15m ████████░░██████████████▒▒▒▒██████████████████░░░███████████████████████
           -15m   ▲14:19 wifi   ▲14:21 portal          ▲14:27 uplink             now
-  3 drops · usually ~22s · longest 1m04s · last 4m12s ago
+  3 drops · usually ~22s · longest 1m04s · last 4m ago
 
   TIP  Tailscale DNS is 12x slower than direct (380 vs 31ms) — consider pausing it.
   v details   t speed test   b bell:on   q quit
@@ -107,7 +107,7 @@ The advanced view keeps 72×18 as its minimum; below that it shows
      ┤▂▃▄▂▁▂█▃▁▂▃▂▁▁▂▃▄▅████▂▁▁▂▃▂▃▄▅▃▂██▁▂▃▄▂▁▂▃▄▅▅█
  LAST 15m ██████░░████████▒▒▒▒██████████████░░░████████████
           -15m ▲14:19  ▲14:21 portal  ▲14:27 uplink      now
-  3 drops · usually ~22s · longest 1m04s · last 4m12s ago
+  3 drops · usually ~22s · longest 1m04s · last 4m ago
   TIP  Tailscale DNS is 12x slower than direct (380 vs 31ms…
   v details   t speed test   b bell:on   q quit
 ```
@@ -136,8 +136,8 @@ else `<iface>`; ` · vpn` when `snap.vpn`. The clock (`fmtTime(snap.wall)`) is r
 gateway, DNS, probe bytes or run time (those stay in the advanced header).
 
 **status** — row 1 segments, separated by 3 spaces, shed whole from the right until the row fits:
-badge (always kept), grade word `OK (B)` (or the cause label for non-graded states, as
-`banner.ts`'s `causeLabel`), timer (`steady 4m12s` in UP/DEGRADED, the red/magenta `DOWN 0:42`
+badge (always kept), the cause label when there is one (`banner.ts`'s `causeLabel`, e.g. `uplink`,
+`dns`), the grade word `OK (B)` in UP/DEGRADED, timer (`steady 4m12s` in UP/DEGRADED, the red/magenta `DOWN 0:42`
 clock while offline), trend phrase + arrow, `FLAKY`, `sat +Nms`, `~ under load`. The drops count is
 not repeated here (it is in the timeline summary). Row 2 is `snap.banner[1]`, cut with `…`. The
 2-tick inverse flash after a transition (§8.1) applies to both rows, as today.
@@ -145,8 +145,9 @@ not repeated here (it is in the timeline summary). Row 2 is `snap.banner[1]`, cu
 **chips** — four equal columns of `floor((cols − 2) / 4)` cells. Row 1 per column:
 `<mark glyph> <name>` in the verdict color (`✔` OK green, `~` SHAKY yellow, `✘` NO red). Names are
 `Chat`, `Browse`, `Video call`, `Download`. Row 2: the verdict `reason` (dim) under each non-OK chip,
-cut at the last ` · ` that fits the column width − 1, else truncated with `…`. Below 46 cols the
-chips form a 2×2 grid (two columns per row, both rows used) and reasons are not shown.
+cut at the last ` · ` that fits the column width − 1, else truncated with `…`. When a full chip would not fit its
+column (below 54 cols in unicode), `Video call` shortens to `Video`. Below 50 cols the chips form a 2×2 grid (two columns per row,
+both rows used) and reasons are not shown.
 
 **chain** — built from the same hop list as the §8.1 PATH row (hops hidden there are hidden here:
 no Wi-Fi hop when not the egress, no Router without a pingable gateway). Each hop renders as
@@ -158,7 +159,7 @@ the dot, in its color (`Internet ● no reply 42s`). Width ladder until the row 
 
 **chart** — row 1 is the caption: `LATENCY  48ms typical · 86ms peaks` (`latencyMs` and `latencyP95`;
 the peaks part is omitted when null; ` · satellite` appended when `snap.sat`). Right-aligned on the
-caption row: `speed test ↓2.8 MB/s 12m ago` when `snap.speed` exists (`speed test running…` while
+caption row: `speed test 12m ago: ↓2.8 MB/s` (`'speed ' + speedText()`, §8.1) when `snap.speed` exists (`speed test running…` while
 `ui.speedRunning`), else `last <n>s`, where n is the number of samples shown. Below that are the plot
 rows (chart rows − 1, at least 3):
 
@@ -183,7 +184,7 @@ spans 15 minutes and fills the row. Row 3 is the drop summary, segments shed fro
 |---|---|
 | no drops this session | `no drops` (green) |
 | `drops15 = 0`, earlier drops | `no drops in 15m · last 42m ago` (green first segment) |
-| `drops15 > 0` | `3 drops · usually ~22s · longest 1m04s · last 4m12s ago` |
+| `drops15 > 0` | `3 drops · usually ~22s · longest 1m04s · last 4m ago` |
 | open outage | `drops here usually last ~22s · longest 1m04s` (omitted when no closed drops) |
 
 `usually` is `dropMedianS`, `longest` is `dropLongestS`, `last … ago` is `sinceLastDrop`, all from
@@ -194,7 +195,8 @@ spans 15 minutes and fills the row. Row 3 is the drop summary, segments shed fro
 **footer** — the existing footer, with keys chosen by view:
 - Simple: `v details`, `t speed test` (`(running)` while running), `b bell:on|off`, `q quit`, and
   `o login` first while `state === 'PORTAL'`. The probe rate is not shown on the right; the log
-  status and transient messages still are.
+  status and transient messages still are; a message with no room beside the keys is shown alone
+  until it expires.
 - Advanced: today's keys plus `v simple`.
 
 ## 5. Color
@@ -257,7 +259,7 @@ Changed:
   requests a repaint.
 - `cli/args.ts` + `cli/types.ts`: the `--advanced` flag. `main.ts` seeds `UiState.view`.
 - `config.ts`: `SIMPLE_MIN_COLS = 40`, `SIMPLE_MIN_ROWS = 10`, `CHART_MIN_ROWS = 4`,
-  `CHART_MAX_ROWS = 14`, `CHIPS_GRID_COLS = 46`.
+  `CHART_MAX_ROWS = 14`, `CHIPS_GRID_COLS = 50`, `TIMELINE_LABEL_W = 10`.
 - `scripts/render-once.ts`: renders both views at 40×10, 60×15, 80×24, 100×30 and 160×50
   (`--view simple|advanced|both`, default both).
 - Main spec: a new §8.8 "Simple view" pointing to this document; §8.4 gains the `v` key; §12 gains
@@ -272,7 +274,8 @@ Changed:
   samples give `x` on the bottom row; color band edges at 300/800 with and without `rttOffset`;
   newest-at-right truncation at narrow widths; double columns at ≥ 120; WARMUP and ICMP-blocked
   captions.
-- `chips`: names, colors and reason cuts at 100/60/46/45/40 cols (the 2×2 grid below 46).
+- `chips`: names, colors and reason cuts at 100/60/54/53/50/49/40 cols (`Video` below 54, the 2×2
+  grid below 50), in unicode and `--ascii`.
 - `chain`: hidden hops, dot colors, first-failure detail, every rung of the width ladder, mark
   glyphs with color off.
 - `status` and `drop-summary`: segment shedding and each summary case in §4.
