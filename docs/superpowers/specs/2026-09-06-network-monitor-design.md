@@ -17,6 +17,8 @@ Within one glance, top to bottom:
 4. **How long do drops last here? Is it getting better?** — a 15-minute timeline bar, a drops table with median/longest/since-last, and a trend phrase.
 5. **Did the portal log me out?** — a PORTAL state, `o` to open the login page, bell on transitions.
 
+The default **simple view** answers 1–4 with a state badge, activity chips, a hop chain, a latency chart and the timeline; the dense screen in §8.1/§8.2 is the **advanced view** (key `v`, flag `--advanced`). See `2026-10-02-simple-view-design.md`.
+
 ## 3. Runtime layout and constants
 
 All constants live in `src/config.ts`. Values used throughout this document:
@@ -446,6 +448,7 @@ Glyphs: `✔` green, `~` yellow, `✘` red, `–` dim (no icmp), `?` dim (unknow
 | `t` | run the 250 KB speed test (rate-limited; refused while not UP/DEGRADED) |
 | `b` | toggle bell on/off (footer shows `bell:on`/`bell:off`) |
 | `o` | `/usr/bin/open <redirectUrl from the last portal result, else --portal-url, else http://captive.apple.com/hotspot-detect.html>` |
+| `v` | switch between the simple view (default) and the advanced view (§8.8) |
 
 No other keys. Unknown keys are ignored.
 
@@ -476,6 +479,10 @@ Probe traffic 0.4 MB.
 ### 8.7 Alerts (`src/actions/alerts.ts`)
 
 Terminal bell `\x07` on confirmed transitions: → DOWN/NO_LINK 1×, → PORTAL 2×, outage → UP/DEGRADED 2×; at most one burst per 5 s; off with `b` or `--no-bell`. Banner inverse flash for 2 ticks regardless. No macOS notifications.
+
+### 8.8 Simple view
+
+The default TUI screen. Layout, sections, colors, glyphs and edge cases are specified in `docs/superpowers/specs/2026-10-02-simple-view-design.md`. Minimum 40×10; `v` toggles to the advanced view (§8.1/§8.2, minimum 72×18), whose too-small message points back at `v`.
 
 ## 9. Process primitive (`src/core/proc.ts`)
 
@@ -546,6 +553,7 @@ bun run src/main.ts [options]
   --log [path]         write JSONL (default path ~/netmon-YYYYMMDD-HHMM.jsonl)
   --portal-url <url>   URL for the o key when no redirect was captured
   --plain              one status line per second, no full-screen UI
+  --advanced           start in the detailed view (default: the simple view)
   --ascii              ASCII glyphs instead of Unicode
   --no-color           no ANSI colors (NO_COLOR env also respected)
   --no-bell            start with the bell off

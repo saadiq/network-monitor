@@ -28,6 +28,7 @@ Quit with `q` or Ctrl-C — either way it prints a one-screen summary of the ses
 --log [path]         write JSONL (default path ~/netmon-YYYYMMDD-HHMM.jsonl)
 --portal-url <url>   URL for the o key when no redirect was captured
 --plain              one status line per second, no full-screen UI
+--advanced           start in the detailed view (default: the simple view)
 --ascii              ASCII glyphs instead of Unicode
 --no-color           no ANSI colors (NO_COLOR env also respected)
 --no-bell            start with the bell off
@@ -42,8 +43,11 @@ Quit with `q` or Ctrl-C — either way it prints a one-screen summary of the ses
 | `t` | run a 250 KB speed test — refused while the connection isn't UP/DEGRADED, and rate-limited to once per 30s |
 | `b` | toggle the terminal bell on/off |
 | `o` | open the captive-portal login page in your default browser |
+| `v` | switch between the simple view and the advanced (detailed) view |
 
 ## Reading the screen
+
+netmon opens in the **simple view**: a colored state badge, the four activity verdicts as colored chips, the hop path as a chain of colored dots, a latency chart for the last minute (bars green/yellow/red by quality, `x` = lost), and the 15-minute timeline with a one-line drop summary. Press `v` (or start with `--advanced`) for the **advanced view** described below, with every number.
 
 ### State & grade
 

@@ -34,7 +34,7 @@ NETMON_CAPTIVE_URL=http://10.255.255.1/x NETMON_HTTPS_URL=https://10.255.255.1/x
 ## Driving the real UI
 
 - Plain mode: `bun run src/main.ts --plain` (one line per second); stop it with `kill -INT <pid>` so the shutdown path runs.
-- Mock frames: `bun run scripts/render-once.ts` renders the mock Snapshot at 100×30 and 80×24 with escapes stripped.
+- Mock frames: `bun run scripts/render-once.ts [--view simple|advanced|both]` renders the mock Snapshot in each view (simple at 40×10 … 160×50, advanced at 100×30 and 80×24) with escapes stripped. The TUI starts in the simple view; `v` toggles.
 - Real TUI under a pty: `expect scripts/tui-session.exp > out.txt`, then `bun run scripts/pty-frame.ts out.txt` for the last frame.
 - In expect scripts, wait with `set timeout N; expect { timeout {} }` — NEVER `sleep`: sleep does not drain the pty, the child's output queue fills and its `tcsetattr()`/writes stall, which looks exactly like a hung event loop but is a harness artifact.
 - Never press `o` in a live TUI (it opens a browser on the user's machine); test `openPortal` only with an injected run function. Never change network settings (no `networksetup` writes, no Wi-Fi off, no sudo).
