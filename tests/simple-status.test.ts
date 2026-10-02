@@ -68,3 +68,8 @@ test('simpleHeader names the Wi-Fi interface, not the VPN tunnel or a missing eg
   const [noRoute] = simpleHeader(makeSnapshot({ route: makeRoute({ hasRoute: false, egressIface: null, wifiIface: 'en1' }) }), 80, G, false);
   expect(noRoute?.startsWith(' netmon  Wi-Fi (en1)')).toBe(true);
 });
+
+test('the WARMUP badge is a plain dim block (no bold+dim mix)', () => {
+  const row = status(makeSnapshot({ state: 'WARMUP' }), ui(), 80, G, true)[0] ?? '';
+  expect(row).toContain('\x1b[7m\x1b[2m WARMUP \x1b[22m\x1b[27m');
+});

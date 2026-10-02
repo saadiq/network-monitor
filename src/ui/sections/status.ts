@@ -12,7 +12,9 @@ const GAP = '   ';
 function badge(snap: Snapshot, g: Glyphs, on: boolean, flash: boolean): string {
   const word = stateWord(snap.state);
   if (!on) return `${g.bullet} ${word}`;
-  const text = color('bold', paint(stateColor(snap.state), ` ${word} `, on), on);
+  const c = stateColor(snap.state);
+  const block = paint(c, ` ${word} `, on);
+  const text = c === 'dim' ? block : color('bold', block, on); // bold and dim share their off code
   return flash ? text : color('inverse', text, on); // a flashing row is already inverse
 }
 
