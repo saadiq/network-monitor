@@ -75,6 +75,9 @@ export interface Glyphs {
   ellipsis: string; // …
   dot: string; // ● simple-view hop dot (colored)
   link: string; // ─ simple-view hop connector
+  axis: string; // ┤ chart y axis
+  eighths: readonly string[]; // ▁▂▃▄▅▆▇ partial chart cells, 1/8 … 7/8
+  full: string; // █ full chart cell
 }
 
 export const GLYPHS: Readonly<Record<'unicode' | 'ascii', Glyphs>> = {
@@ -84,6 +87,7 @@ export const GLYPHS: Readonly<Record<'unicode' | 'ascii', Glyphs>> = {
     ramp: ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'], lost: 'x',
     bullet: '●', arrow: '→', rule: '─', sep: '·', dl: '↓', ul: '↑', em: '—', ellipsis: '…',
     dot: '●', link: '─',
+    axis: '┤', eighths: ['▁', '▂', '▃', '▄', '▅', '▆', '▇'], full: '█',
   },
   ascii: {
     ok: 'OK', shaky: '~', fail: 'X', dash: '-', unknown: '?', up: '^', down: 'v',
@@ -91,6 +95,7 @@ export const GLYPHS: Readonly<Record<'unicode' | 'ascii', Glyphs>> = {
     ramp: ['_', '.', '-', '=', '+', '*', '#', '@'], lost: 'x',
     bullet: '*', arrow: '->', rule: '-', sep: '|', dl: 'v', ul: '^', em: '-', ellipsis: '...',
     dot: 'o', link: '-',
+    axis: '|', eighths: ['.', '_', '-', '=', '+', '*', '%'], full: '#',
   },
 };
 

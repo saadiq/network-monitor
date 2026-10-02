@@ -86,3 +86,20 @@ export function ellipsize(s: string, w: number, g: Glyphs): string {
   if (visibleWidth(s) <= w) return s;
   return truncate(s, Math.max(0, w - visibleWidth(g.ellipsis))) + g.ellipsis;
 }
+
+/** One character per cell with a color each → one escape pair per run of equal color. */
+export function paintRuns(chars: readonly string[], colors: readonly (ColorName | null)[], on: boolean): string {
+  let out = '';
+  let run = '';
+  let cur: ColorName | null = null;
+  chars.forEach((ch, i) => {
+    const c = colors[i] ?? null;
+    if (c !== cur) {
+      out += paint(cur, run, on);
+      run = '';
+      cur = c;
+    }
+    run += ch;
+  });
+  return out + paint(cur, run, on);
+}
