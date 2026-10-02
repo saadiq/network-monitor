@@ -65,14 +65,15 @@ function axisLabel(r: number, rows: number, p: Plot, g: Glyphs, on: boolean): st
 }
 
 function plotRows(snap: Snapshot, p: Plot, rows: number, g: Glyphs, on: boolean): string[] {
+  const bars = p.shown.map((v) => (v == null ? null : { e: barEighths(v, rows, p.top), c: barColor(v, snap.rttOffset) }));
   const out: string[] = [];
   for (let r = 0; r < rows; r++) {
     const fromBottom = rows - 1 - r;
     const chars: string[] = [];
     const colors: (ColorName | null)[] = [];
-    for (const v of p.shown) {
-      const ch = v == null ? (fromBottom === 0 ? g.lost : ' ') : barCell(barEighths(v, rows, p.top), fromBottom, g);
-      const c: ColorName = v == null ? 'red' : barColor(v, snap.rttOffset);
+    for (const b of bars) {
+      const ch = b ? barCell(b.e, fromBottom, g) : fromBottom === 0 ? g.lost : ' ';
+      const c: ColorName = b ? b.c : 'red';
       for (let k = 0; k < p.per; k++) {
         chars.push(ch);
         colors.push(ch === ' ' ? null : c);

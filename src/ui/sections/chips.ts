@@ -6,14 +6,19 @@ import type { ActivityName, Snapshot, Verdict } from '../../model/types';
 import type { Glyphs } from '../ansi';
 import { LEAD, ellipsize, levelMark, markColor, markGlyph, paint } from './common';
 
-const NAMES: Readonly<Record<ActivityName, string>> = {
-  CHAT: 'Chat', BROWSE: 'Browse', 'VIDEO CALL': 'Video call', DOWNLOAD: 'Download',
+/** Full and short chip names; the short one is used when a full chip would not fit its column. */
+const NAMES: Readonly<Record<ActivityName, readonly [full: string, short: string]>> = {
+  CHAT: ['Chat', 'Chat'], BROWSE: ['Browse', 'Browse'], 'VIDEO CALL': ['Video call', 'Video'], DOWNLOAD: ['Download', 'Download'],
 };
 
+/** `✔ Chat`, uncolored. */
+function chipText(v: Verdict, short: boolean, g: Glyphs): string {
+  const [full, abbr] = NAMES[v.name];
+  return `${markGlyph(levelMark(v.level), g)} ${short ? abbr : full}`;
+}
+
 function chip(v: Verdict, short: boolean, g: Glyphs, on: boolean): string {
-  const m = levelMark(v.level);
-  const name = short && v.name === 'VIDEO CALL' ? 'Video' : NAMES[v.name];
-  return paint(markColor(m), `${markGlyph(m, g)} ${name}`, on);
+  return paint(markColor(levelMark(v.level)), chipText(v, short, g), on);
 }
 
 /** The reason cut at the last ` · ` (g.sep) that fits in w, else ellipsized. */
@@ -40,7 +45,7 @@ export function chips(snap: Snapshot, w: number, g: Glyphs, on: boolean): string
   const vs = snap.verdicts;
   if (w < CHIPS_GRID_COLS) return grid(vs, w, g, on);
   const col = Math.floor((w - LEAD.length) / 4);
-  const short = vs.some((v) => visibleWidth(chip(v, false, g, false)) > col - 1);
+  const short = vs.some((v) => visibleWidth(chipText(v, false, g)) > col - 1);
   let top = LEAD;
   let under = LEAD;
   for (const v of vs) {

@@ -28,15 +28,16 @@ function node(h: Hop, detail: string, abbrev: boolean, g: Glyphs, on: boolean): 
   return `${name} ${dot}${detail ? ' ' + paint(c, detail, on) : ''}`;
 }
 
-function render(hops: Hop[], bad: number, r: Rung, g: Glyphs, on: boolean): string {
-  const details = hops.map((h, i) => (r.detail && i === bad ? hopDetail(h, 'compact') : ''));
+/** The row for one ladder rung; `detail` belongs to hop `bad` (the first non-ok one). */
+function render(hops: Hop[], bad: number, detail: string, r: Rung, g: Glyphs, on: boolean): string {
+  const shown = r.detail ? detail : '';
   let out = LEAD;
   hops.forEach((h, i) => {
     if (i > 0) {
-      const afterDetail = (details[i - 1] ?? '') !== '';
+      const afterDetail = i - 1 === bad && shown !== '';
       out += paint('dim', (afterDetail ? ' ' : '') + g.link.repeat(r.dashes) + (r.space ? ' ' : ''), on);
     }
-    out += node(h, details[i] ?? '', r.abbrev, g, on);
+    out += node(h, i === bad ? shown : '', r.abbrev, g, on);
   });
   return out;
 }
@@ -45,9 +46,11 @@ function render(hops: Hop[], bad: number, r: Rung, g: Glyphs, on: boolean): stri
 export function chain(snap: Snapshot, w: number, g: Glyphs, on: boolean): string[] {
   const hops = hopList(snap, g);
   const bad = hops.findIndex(isBad);
+  const badHop = hops[bad];
+  const detail = badHop ? hopDetail(badHop, 'compact') : '';
   let line = LEAD;
   for (const r of LADDER) {
-    line = render(hops, bad, r, g, on);
+    line = render(hops, bad, detail, r, g, on);
     if (visibleWidth(line) <= w) break;
   }
   return [fit(line, w)];
