@@ -4,6 +4,7 @@ import { TAILSCALE_DNS } from '../../config';
 import { fit, fmtBytes, fmtDuration, fmtTime, visibleWidth } from '../../core/format';
 import type { Snapshot } from '../../model/types';
 import { GLYPHS, color, type Glyphs } from '../ansi';
+import { shedRight } from './common';
 
 const MIN_GAP = 2;
 
@@ -26,11 +27,7 @@ export function header(snap: Snapshot, w: number, g: Glyphs = GLYPHS.unicode, co
   const parts = leftParts(snap, g);
   const right = `${fmtTime(snap.wall)}  run ${fmtDuration(snap.runS)}`;
   const rw = visibleWidth(right);
-  let left = name;
-  for (let n = parts.length; n >= 1; n--) {
-    left = name + parts.slice(0, n).join(` ${g.sep} `);
-    if (visibleWidth(left) + MIN_GAP + rw <= w) break;
-  }
+  const left = name + shedRight(parts, ` ${g.sep} `, w - visibleWidth(name) - MIN_GAP - rw);
   const gap = Math.max(1, w - visibleWidth(left) - rw);
   return [fit(left + ' '.repeat(gap) + right, w)];
 }

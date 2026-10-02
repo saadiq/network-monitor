@@ -4,7 +4,7 @@
 import { fit, visibleWidth } from '../../core/format';
 import type { Snapshot } from '../../model/types';
 import { GLYPHS, type Glyphs } from '../ansi';
-import { LEAD, markColor, markGlyph, paint, type SectionPlan } from './common';
+import { LEAD, markColor, markGlyph, paint, shedRight, type SectionPlan } from './common';
 import { hopDetail, hopList, type Detail, type Hop } from './hops';
 
 /** path() steps down this ladder until the row fits (never truncates a hop). */
@@ -22,13 +22,7 @@ function renderHop(h: Hop, level: Detail, g: Glyphs, on: boolean): string {
 
 /** Last resort: as many whole hops as fit, so the row never ends on a dangling arrow. */
 function keepWholeHops(parts: string[], head: string, sep: string, w: number): string {
-  let out = head;
-  for (const [i, p] of parts.entries()) {
-    const next = i === 0 ? out + p : out + sep + p;
-    if (visibleWidth(next) > w) break;
-    out = next;
-  }
-  return fit(out, w);
+  return fit(head + shedRight(parts, sep, w - visibleWidth(head)), w);
 }
 
 /** One row, exactly `plan.cols` cells; hop detail is shed before anything is cut. */

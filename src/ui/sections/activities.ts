@@ -1,10 +1,10 @@
 // §8.1 activity strip: `CHAT ✔ OK    BROWSE ✔ OK    VIDEO ~ SHAKY jitter 71ms · audio ok    DOWNLOAD ✘ NO …`.
 // One row at ≥ FULL_COLS; below that two rows, items wrapped greedily (§8.2 mockup: 3 + 1).
 import { FULL_COLS } from '../../config';
-import { fit, truncate, visibleWidth } from '../../core/format';
+import { fit, visibleWidth } from '../../core/format';
 import type { ActivityName, Snapshot, Verdict } from '../../model/types';
 import { GLYPHS, type Glyphs } from '../ansi';
-import { LEAD, levelMark, markColor, markGlyph, paint, type SectionPlan } from './common';
+import { LEAD, ellipsize, levelMark, markColor, markGlyph, paint, type SectionPlan } from './common';
 
 const ORDER: readonly ActivityName[] = ['CHAT', 'BROWSE', 'VIDEO CALL', 'DOWNLOAD'];
 const LABEL: Readonly<Record<ActivityName, string>> = {
@@ -50,7 +50,7 @@ function row(list: Item[], w: number, g: Glyphs): string {
       return `${it.head} ${it.reason}`;
     }
     if (room < MIN_REASON) return it.head;
-    const cut = truncate(it.reason, room - 1 - visibleWidth(g.ellipsis)) + g.ellipsis;
+    const cut = ellipsize(it.reason, room - 1, g);
     room -= 1 + visibleWidth(cut);
     return `${it.head} ${cut}`;
   });
