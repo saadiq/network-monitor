@@ -73,6 +73,8 @@ export interface Glyphs {
   ul: string; // ↑ upload
   em: string; // — em dash / unknown value
   ellipsis: string; // …
+  dot: string; // ● simple-view hop dot (colored)
+  link: string; // ─ simple-view hop connector
 }
 
 export const GLYPHS: Readonly<Record<'unicode' | 'ascii', Glyphs>> = {
@@ -81,12 +83,14 @@ export const GLYPHS: Readonly<Record<'unicode' | 'ascii', Glyphs>> = {
     cellUp: '█', cellDegraded: '▓', cellPortal: '▒', cellDown: '░', cellGap: '·',
     ramp: ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'], lost: 'x',
     bullet: '●', arrow: '→', rule: '─', sep: '·', dl: '↓', ul: '↑', em: '—', ellipsis: '…',
+    dot: '●', link: '─',
   },
   ascii: {
     ok: 'OK', shaky: '~', fail: 'X', dash: '-', unknown: '?', up: '^', down: 'v',
     cellUp: '#', cellDegraded: '=', cellPortal: ':', cellDown: '.', cellGap: '.',
     ramp: ['_', '.', '-', '=', '+', '*', '#', '@'], lost: 'x',
     bullet: '*', arrow: '->', rule: '-', sep: '|', dl: 'v', ul: '^', em: '-', ellipsis: '...',
+    dot: 'o', link: '-',
   },
 };
 
