@@ -109,6 +109,7 @@ export function slotFor(plan: LayoutPlan, id: SectionId): Slot | null {
 
 /** The single-line frame below a view's minimum (§8.2; simple-view spec §3). ASCII; composeLines cuts it to cols. */
 export function tooSmallMessage(p: Size & { view?: View }): string {
-  if (p.view === 'simple') return `too small (need ${SIMPLE_MIN_COLS}x${SIMPLE_MIN_ROWS})`;
+  const simpleFits = p.cols >= SIMPLE_MIN_COLS && p.rows >= SIMPLE_MIN_ROWS;
+  if (p.view === 'simple' || !simpleFits) return `too small (need ${SIMPLE_MIN_COLS}x${SIMPLE_MIN_ROWS})`;
   return `details need ${MIN_COLS}x${MIN_ROWS} (have ${p.cols}x${p.rows}); press v`;
 }

@@ -93,3 +93,9 @@ test('spacer rows compose as blank lines', () => {
   const lines = composeLines(p, { header: ['H'], status: ['S1', 'S2'], footer: ['F'] }, '');
   expect([lines[0], lines[1], lines[2], lines[23]]).toEqual(['H', '', 'S1', 'F']);
 });
+
+test('below the simple view\'s own minimum the advanced message does not suggest v', () => {
+  expect(tooSmallMessage(planLayout({ cols: 30, rows: 8 }))).toBe('too small (need 40x10)');
+  expect(tooSmallMessage(planLayout({ cols: 50, rows: 9 }))).toBe('too small (need 40x10)');
+  expect(tooSmallMessage(planLayout({ cols: 50, rows: 12 }))).toBe('details need 72x18 (have 50x12); press v');
+});

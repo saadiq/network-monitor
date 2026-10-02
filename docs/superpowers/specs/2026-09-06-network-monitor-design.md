@@ -46,7 +46,7 @@ All constants live in `src/config.ts`. Values used throughout this document:
 | `SPEED_BYTES` / `SPEED_MIN_GAP_MS` / `SPEED_VALID_MS` | 250000 / 30000 / 600000 | Opt-in test |
 | `BELL_MIN_GAP_MS` | 5000 | Rate limit |
 | `GAP_MS` | 5000 | Tick gap ≥ 5 s = sleep |
-| `MIN_COLS` / `MIN_ROWS` | 72 / 18 | Below this, "terminal too small" |
+| `MIN_COLS` / `MIN_ROWS` | 72 / 18 | Below this the advanced view shows only a too-small line pointing at `v` |
 | `FULL_COLS` / `FULL_ROWS` | 100 / 27 | Full layout |
 | `LOADED_KBS` | 500 | Passive in+out above this tags ping samples `loaded` |
 
@@ -431,7 +431,7 @@ Glyphs: `✔` green, `~` yellow, `✘` red, `–` dim (no icmp), `?` dim (unknow
   q quit  t speed test (250 KB)  b bell:on  o open portal        probes ~1.2 MB/h
 ```
 
-`planLayout(size)` places sections by priority while rows remain: header 1, banner 2, activities (1 at ≥ 100 cols, 2 below), path 1, footer 1 (pinned to the last row), then timeline 2, metrics (6 full incl. sparkline / 6 compact incl. the wifi+traffic line), drops 4 (3 at < 27 rows), tip 1; rule lines are added last, only where rows remain, in top-to-bottom order. Timeline: 90 cells × 10 s at ≥ 100 cols, 60 cells × 15 s below. Below 72×18 the frame is only `terminal too small (need 72x18, have CxR)`. Every line is padded/truncated to exactly `cols` visible characters (ANSI-aware); the body never scrolls.
+`planLayout(size)` places sections by priority while rows remain: header 1, banner 2, activities (1 at ≥ 100 cols, 2 below), path 1, footer 1 (pinned to the last row), then timeline 2, metrics (6 full incl. sparkline / 6 compact incl. the wifi+traffic line), drops 4 (3 at < 27 rows), tip 1; rule lines are added last, only where rows remain, in top-to-bottom order. Timeline: 90 cells × 10 s at ≥ 100 cols, 60 cells × 15 s below. Below 72×18 the frame is only `details need 72x18 (have CxR); press v` (or `too small (need 40x10)` when even the simple view, §8.8, would not fit). Every line is padded/truncated to exactly `cols` visible characters (ANSI-aware); the body never scrolls.
 
 ### 8.3 Terminal handling (`src/ui/tty.ts`, `src/ui/frame.ts`)
 
