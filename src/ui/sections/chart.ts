@@ -46,21 +46,30 @@ function barCell(e: number, fromBottom: number, g: Glyphs): string {
 
 interface Plot { axisW: number; top: number; per: number; shown: (number | null)[] }
 
+/** Largest finite reply in `vs` (0 when there is none). */
+function maxReply(vs: readonly (number | null)[]): number {
+  return vs.reduce<number>((m, v) => (v != null && Number.isFinite(v) && v > m ? v : m), 0);
+}
+
+/**
+ * The axis is as wide as the whole history's scale label could need, so the plot width does not
+ * jump; the scale itself comes from the samples actually drawn, so a hidden older spike cannot
+ * flatten the visible bars.
+ */
 function geometry(snap: Snapshot, cols: number): Plot {
-  const nums = snap.rttHistory.filter((v): v is number => v != null && Number.isFinite(v));
-  const top = niceTop(nums.length ? Math.max(...nums) : 0);
-  const axisW = String(top).length + 1;
+  const axisW = String(niceTop(maxReply(snap.rttHistory))).length + 1;
   const width = Math.max(0, cols - LEAD.length - axisW);
   const per = width >= WIDE_PLOT ? 2 : 1;
   const n = Math.floor(width / per);
-  return { axisW, top, per, shown: n > 0 ? snap.rttHistory.slice(-n) : [] };
+  const shown = n > 0 ? snap.rttHistory.slice(-n) : [];
+  return { axisW, top: niceTop(maxReply(shown)), per, shown };
 }
 
+/** `top` on the first plot row; `top/2` on the row holding the half level (at ≥ 4 rows). */
 function axisLabel(r: number, rows: number, p: Plot, g: Glyphs, on: boolean): string {
-  const mid = Math.round(rows / 2);
   let label = '';
   if (r === 0) label = String(p.top);
-  else if (rows >= 4 && r === mid) label = String(Math.round((p.top * (rows - r)) / rows));
+  else if (rows >= 4 && r === Math.floor(rows / 2)) label = String(p.top / 2);
   return paint('dim', padStart(label, p.axisW - 1) + g.axis, on);
 }
 
@@ -117,7 +126,7 @@ export function chart(snap: Snapshot, ui: UiState, cols: number, rows: number, g
   const p = geometry(snap, cols);
   const plotting = !snap.icmpBlocked && snap.rttHistory.length >= MIN_SAMPLES;
   const right = captionRight(snap, ui, plotting ? p.shown.length : 0, g);
-  const lines = [caption(LEAD + captionLeft(snap, g), right, cols, on)];
+  const lines = [caption(LEAD + paint('dim', captionLeft(snap, g), on), right, cols, on)];
   if (plotting) lines.push(...plotRows(snap, p, rows - 1, g, on));
   while (lines.length < rows) lines.push('');
   return lines.map((l) => fit(l, cols));

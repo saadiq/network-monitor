@@ -96,3 +96,21 @@ test('every size: exactly rows lines of exactly cols cells; ascii stays ASCII', 
   }
   for (const l of chart(makeSnapshot({ speed: null }), ui(), 80, 7, A, false)) expect(ASCII_RE.test(l)).toBe(true);
 });
+
+test('the axis scale comes from the samples drawn, not from hidden older ones', () => {
+  // 60 cols draw the newest 53–54 samples; a 4000 ms reply among the oldest must not flatten them
+  const snap = makeSnapshot({ rttHistory: [4000, ...new Array<number>(59).fill(50)], speed: null });
+  const lines = chart(snap, ui(), 60, 6, G, false);
+  expect(lines[1]).toContain('50┤');
+  expect(lines.join('\n')).not.toContain('5000');
+});
+
+test('the middle axis label is half the top, on the row that holds the half level', () => {
+  // 5 plot rows, top 100: half (50) lies inside row 2 (from the top)
+  const lines = chart(makeSnapshot({ rttHistory: [40, 58, 45], speed: null }), ui(), 60, 6, G, false);
+  expect(lines.slice(1).map((l) => l.trimEnd().replace(/[█▁▂▃▄▅▆▇ ]+$/, ''))).toEqual(['  100┤', '     ┤', '   50┤', '     ┤', '     ┤']);
+});
+
+test('the left caption is dim like the rest of the chart text (spec §5)', () => {
+  expect(chart(makeSnapshot({ rttHistory: [] }), ui(), 60, 4, G, true)[0]).toContain('\x1b[2mLATENCY  measuring…');
+});
