@@ -86,7 +86,7 @@ test('60x16 is too small', () => {
   expect(p.sections).toEqual([]);
   expect(p.slots).toEqual([]);
   expect(p.rules).toEqual([]);
-  expect(tooSmallMessage(p)).toBe('terminal too small (need 72x18, have 60x16)');
+  expect(tooSmallMessage(p)).toBe('details need 72x18 (have 60x16); press v');
   expect(planLayout({ cols: 120, rows: 17 }).tooSmall).toBe(true);
   expect(planLayout({ cols: 71, rows: 40 }).tooSmall).toBe(true);
 });
@@ -195,11 +195,11 @@ test('composeLines: too-small plan yields the single message line', () => {
   const plan = planLayout({ cols: 60, rows: 16 });
   const lines = composeLines(plan, { header: ['H'], footer: ['F'] }, ruleLine(60, '─'));
   expect(lines.length).toBe(16);
-  expect(lines[0]).toBe('terminal too small (need 72x18, have 60x16)');
+  expect(lines[0]).toBe('details need 72x18 (have 60x16); press v');
   expect(lines.slice(1).every((l) => l === '')).toBe(true);
   const rows = frameRows(renderFrame(lines, { cols: 60, rows: 16 }));
   expect(rows.length).toBe(16);
-  expect(strip(rows[0] ?? '').trimEnd()).toBe('terminal too small (need 72x18, have 60x16)');
+  expect(strip(rows[0] ?? '').trimEnd()).toBe('details need 72x18 (have 60x16); press v');
 });
 
 test('ascii mode: rule and frame stay pure ASCII', () => {

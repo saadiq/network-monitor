@@ -1,16 +1,24 @@
 // §8.2 layout planning. Pure: terminal size in, section placement out.
-import { FULL_COLS, FULL_ROWS, MIN_COLS, MIN_ROWS, TIMELINE_COMPACT, TIMELINE_FULL } from '../config';
+import {
+  FULL_COLS, FULL_ROWS, MIN_COLS, MIN_ROWS, SIMPLE_MIN_COLS, SIMPLE_MIN_ROWS, TIMELINE_COMPACT, TIMELINE_FULL,
+} from '../config';
+import type { View } from '../model/types';
 
 export interface Size { cols: number; rows: number }
 
 export type SectionId =
   | 'header' | 'banner' | 'activities' | 'path' | 'footer'
-  | 'timeline' | 'metrics' | 'drops' | 'tip';
+  | 'timeline' | 'metrics' | 'drops' | 'tip'
+  | 'status' | 'chips' | 'chain' | 'chart'; // simple view (simple-view spec §3)
+
+/** The sections of the advanced (§8.1/§8.2) screen. */
+type AdvancedId = Exclude<SectionId, 'status' | 'chips' | 'chain' | 'chart'>;
 
 /** One placed section: 1-based start row and the rows it owns. */
 export interface Slot { id: SectionId; row: number; rows: number }
 
 export interface LayoutPlan {
+  view: View; // which screen this plan is for
   cols: number;
   rows: number;
   tooSmall: boolean; // < 72×18: frame is only tooSmallMessage()
@@ -22,22 +30,23 @@ export interface LayoutPlan {
   cellMs: number; // 10 s / 15 s
   activitiesRows: number; // 1 at ≥ 100 cols, else 2; 0 when not placed
   dropsRows: number; // 4, or 3 at < 27 rows; 0 when not placed
+  chartRows: number; // simple view: caption + plot rows; 0 otherwise
 }
 
 /** §8.2 placement priority: a section is placed when its rows still fit. */
-const PRIORITY: readonly SectionId[] = [
+const PRIORITY: readonly AdvancedId[] = [
   'header', 'banner', 'activities', 'path', 'footer', 'timeline', 'metrics', 'drops', 'tip',
 ];
 /** Screen order, top → bottom (footer pinned to the last row). */
-const DISPLAY: readonly SectionId[] = [
+const DISPLAY: readonly AdvancedId[] = [
   'header', 'banner', 'activities', 'path', 'metrics', 'timeline', 'drops', 'tip', 'footer',
 ];
 /** Rule candidates ("directly below section X"), top → bottom; added last while rows remain. */
-const RULES_FULL: readonly SectionId[] = ['header', 'banner', 'activities', 'path', 'metrics', 'timeline', 'drops'];
+const RULES_FULL: readonly AdvancedId[] = ['header', 'banner', 'activities', 'path', 'metrics', 'timeline', 'drops'];
 /** Compact keeps banner/activities/path as one block (§8.2 mockup). */
-const RULES_COMPACT: readonly SectionId[] = ['header', 'path', 'metrics', 'timeline', 'drops'];
+const RULES_COMPACT: readonly AdvancedId[] = ['header', 'path', 'metrics', 'timeline', 'drops'];
 
-function rowsNeeded(cols: number, rows: number): Record<SectionId, number> {
+function rowsNeeded(cols: number, rows: number): Record<AdvancedId, number> {
   return {
     header: 1,
     banner: 2,
@@ -58,13 +67,13 @@ export function planLayout(size: Size): LayoutPlan {
   const compact = cols < FULL_COLS || rows < FULL_ROWS;
   const tl = cols >= FULL_COLS ? TIMELINE_FULL : TIMELINE_COMPACT;
   const plan: LayoutPlan = {
-    cols, rows, tooSmall, compact, sections: [], slots: [], rules: [],
-    timelineCells: tl.cells, cellMs: tl.cellMs, activitiesRows: 0, dropsRows: 0,
+    view: 'advanced', cols, rows, tooSmall, compact, sections: [], slots: [], rules: [],
+    timelineCells: tl.cells, cellMs: tl.cellMs, activitiesRows: 0, dropsRows: 0, chartRows: 0,
   };
   if (tooSmall) return plan;
 
   const need = rowsNeeded(cols, rows);
-  const placed = new Set<SectionId>();
+  const placed = new Set<AdvancedId>();
   let free = rows;
   for (const id of PRIORITY) {
     if (need[id] <= free) {
@@ -72,7 +81,7 @@ export function planLayout(size: Size): LayoutPlan {
       free -= need[id];
     }
   }
-  const ruleAfter = new Set<SectionId>();
+  const ruleAfter = new Set<AdvancedId>();
   for (const id of compact ? RULES_COMPACT : RULES_FULL) {
     if (free <= 0) break;
     if (!placed.has(id)) continue;
@@ -101,7 +110,8 @@ export function slotFor(plan: LayoutPlan, id: SectionId): Slot | null {
   return plan.slots.find((s) => s.id === id) ?? null;
 }
 
-/** §8.2 single-line frame below 72×18. */
-export function tooSmallMessage(size: Size): string {
-  return `terminal too small (need ${MIN_COLS}x${MIN_ROWS}, have ${size.cols}x${size.rows})`;
+/** The single-line frame below a view's minimum (§8.2; simple-view spec §3). ASCII; ≤ 40 cells. */
+export function tooSmallMessage(p: Size & { view?: View }): string {
+  if (p.view === 'simple') return `too small (need ${SIMPLE_MIN_COLS}x${SIMPLE_MIN_ROWS})`;
+  return `details need ${MIN_COLS}x${MIN_ROWS} (have ${p.cols}x${p.rows}); press v`;
 }

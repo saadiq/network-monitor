@@ -190,6 +190,12 @@ export const METRIC_CELL_W = 24;
 export const METRIC_CELL_START = 3;
 export const TIMELINE_FULL = { cells: 90, cellMs: 10000 } as const;
 export const TIMELINE_COMPACT = { cells: 60, cellMs: 15000 } as const;
+// simple-view spec §3 (docs/superpowers/specs/2026-10-02-simple-view-design.md)
+export const SIMPLE_MIN_COLS = 40;
+export const SIMPLE_MIN_ROWS = 10;
+export const CHART_MIN_ROWS = 4; // caption + 3 plot rows
+export const CHART_MAX_ROWS = 14;
+export const TIMELINE_LABEL_W = 10; // ` LAST 15m `
 export const FLASH_TICKS = 2; // banner inverse after a transition
 export const MAX_FPS = 4;
 export const BELL_COUNTS = { DOWN: 1, NO_LINK: 1, PORTAL: 2, RECOVER: 2 } as const;

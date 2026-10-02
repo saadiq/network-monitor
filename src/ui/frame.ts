@@ -1,6 +1,6 @@
 // §8.3 frame assembly. Pure: lines in, one escape string out (written with a single stdout.write).
 import { MAX_FPS } from '../config';
-import { fit } from '../core/format';
+import { fit, truncate } from '../core/format';
 import { CSI, cursorTo } from './ansi';
 import { tooSmallMessage, type LayoutPlan, type SectionId, type Size } from './layout';
 
@@ -44,7 +44,7 @@ export function ruleLine(cols: number, glyph: string): string {
 export function composeLines(plan: LayoutPlan, parts: SectionLines, rule: string): string[] {
   const lines: string[] = new Array<string>(plan.rows).fill('');
   if (plan.tooSmall) {
-    if (plan.rows > 0) lines[0] = tooSmallMessage(plan);
+    if (plan.rows > 0) lines[0] = truncate(tooSmallMessage(plan), plan.cols);
     return lines;
   }
   for (const r of plan.rules) lines[r - 1] = rule;
