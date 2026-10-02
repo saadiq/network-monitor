@@ -1,5 +1,6 @@
 // Minimal Snapshot / UiState factory for the section tests, using the §8.1 mockup values.
 import type { Snapshot, UiState } from '../src/model/types';
+import { makeUi } from './helpers/snapshot';
 import type { Signals } from '../src/model/types-snapshot';
 import type { StreamStats } from '../src/probes/types';
 
@@ -83,8 +84,5 @@ export function makeSnapshot(over: Partial<Snapshot> = {}): Snapshot {
 }
 
 export function ui(over: Partial<UiState> = {}): UiState {
-  return {
-    view: 'advanced', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null, lastSpeed: null,
-    speedRunning: false, logStatus: null, ...over,
-  };
+  return makeUi({ view: 'advanced', ...over });
 }

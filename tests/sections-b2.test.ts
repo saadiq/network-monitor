@@ -8,7 +8,7 @@ import { planLayout } from '../src/ui/layout';
 import { glyphs, strip } from '../src/ui/ansi';
 import { visibleWidth } from '../src/core/format';
 import type { UiState } from '../src/model/types';
-import { makeSnapshot, makeOutage, makeTrend, makeGwStats, makeStreamStats, wallAt } from './helpers/snapshot';
+import { makeSnapshot, makeOutage, makeTrend, makeGwStats, makeStreamStats, wallAt, makeUi } from './helpers/snapshot';
 
 const G = glyphs(false);
 const A = glyphs(true);
@@ -16,8 +16,7 @@ const FULL = planLayout({ cols: 100, rows: 30 });
 const C80 = planLayout({ cols: 80, rows: 24 });
 const C72 = planLayout({ cols: 72, rows: 18 });
 
-const ui = (o: Partial<UiState> = {}): UiState =>
-  ({ view: 'advanced', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null, lastSpeed: null, speedRunning: false, logStatus: null, ...o });
+const ui = (o: Partial<UiState> = {}): UiState => makeUi({ view: 'advanced', ...o });
 
 const cells = (row: string): string[] => [2, 26, 50, 74].map((i) => strip(row).slice(i, i + 24));
 

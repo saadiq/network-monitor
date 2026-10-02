@@ -4,15 +4,11 @@ import { simpleHeader } from '../src/ui/sections/header';
 import { ellipsize, shedRight } from '../src/ui/sections/common';
 import { glyphs, strip } from '../src/ui/ansi';
 import { visibleWidth } from '../src/core/format';
-import type { UiState } from '../src/model/types';
-import { FLAT_TREND, makeGrade, makeRoute, makeSnapshot } from './helpers/snapshot';
+import { FLAT_TREND, makeGrade, makeRoute, makeSnapshot, makeUi } from './helpers/snapshot';
 
 const G = glyphs(false);
 const A = glyphs(true);
-const ui = (o: Partial<UiState> = {}): UiState => ({
-  view: 'simple', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null,
-  lastSpeed: null, speedRunning: false, logStatus: null, ...o,
-});
+const ui = makeUi;
 const SENTENCE = 'Fine for chat & browsing. Video call shaky (jitter 71ms). Big downloads: no (3 drops/15m).';
 
 test('shedRight keeps whole segments from the left; ellipsize marks a cut', () => {

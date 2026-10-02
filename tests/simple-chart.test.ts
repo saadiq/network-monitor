@@ -2,16 +2,12 @@ import { test, expect } from 'bun:test';
 import { barColor, barEighths, chart, niceTop } from '../src/ui/sections/chart';
 import { glyphs, strip } from '../src/ui/ansi';
 import { visibleWidth } from '../src/core/format';
-import type { UiState } from '../src/model/types';
-import { makeSnapshot } from './helpers/snapshot';
+import { makeSnapshot, makeUi } from './helpers/snapshot';
 
 const G = glyphs(false);
 const A = glyphs(true);
 const ASCII_RE = /^[\x00-\x7f]*$/;
-const ui = (o: Partial<UiState> = {}): UiState => ({
-  view: 'simple', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null,
-  lastSpeed: null, speedRunning: false, logStatus: null, ...o,
-});
+const ui = makeUi;
 
 test('niceTop: 50, 100, 200, 500, 1000, … never below 50', () => {
   expect([0, 49, 50, 51, 999, 1000, 1001, 12000].map(niceTop)).toEqual([50, 50, 50, 100, 1000, 1000, 2000, 20000]);

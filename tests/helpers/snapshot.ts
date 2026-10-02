@@ -1,6 +1,6 @@
 // Test factory: a complete, valid Snapshot with mockup (§8.1) defaults.
 // Every field can be overridden; sub-factories build the nested records.
-import type { Aged, Signals, Snapshot } from '../../src/model/types';
+import type { Aged, Signals, Snapshot, UiState } from '../../src/model/types';
 import type {
   ActivityName, CellState, DropStats, GradeInfo, Outage, Trend, Verdict,
 } from '../../src/model/types';
@@ -181,4 +181,12 @@ export function makeSnapshot(o: Partial<Snapshot> = {}): Snapshot {
   // much loss" for the grade too, so mirror it unless the test pins lossGrade itself.
   if (o.lossGrade === undefined) snap.lossGrade = snap.loss60;
   return snap;
+}
+
+/** A complete UiState: simple view, bell on, nothing transient. */
+export function makeUi(o: Partial<UiState> = {}): UiState {
+  return {
+    view: 'simple', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null,
+    lastSpeed: null, speedRunning: false, logStatus: null, ...o,
+  };
 }

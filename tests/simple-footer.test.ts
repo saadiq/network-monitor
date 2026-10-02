@@ -2,12 +2,9 @@ import { test, expect } from 'bun:test';
 import { footer } from '../src/ui/sections/footer';
 import { visibleWidth } from '../src/core/format';
 import type { UiState } from '../src/model/types';
-import { makeSnapshot } from './helpers/snapshot';
+import { makeSnapshot, makeUi } from './helpers/snapshot';
 
-const ui = (o: Partial<UiState> = {}): UiState => ({
-  view: 'simple', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null,
-  lastSpeed: null, speedRunning: false, logStatus: null, ...o,
-});
+const ui = makeUi;
 const f = (w: number, o: Partial<UiState> = {}, snap = makeSnapshot()): string => footer(snap, ui(o), w)[0] ?? '';
 
 test('simple footer: v details first, no probe rate', () => {

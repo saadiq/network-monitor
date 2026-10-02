@@ -2,14 +2,11 @@ import { test, expect } from 'bun:test';
 import { dispatchKey, KEY_VIEW, type KeyActions } from '../src/ui/keys';
 import { viewAction } from '../src/app/actions';
 import { parseArgs, usage } from '../src/cli/args';
-import type { UiState } from '../src/model/types';
+import { makeUi } from './helpers/snapshot';
 
 const env = { env: { HOME: '/Users/test' }, now: new Date(2026, 8, 6, 14, 32, 7) };
 
-const ui = (o: Partial<UiState> = {}): UiState => ({
-  view: 'simple', bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null,
-  lastSpeed: null, speedRunning: false, logStatus: null, ...o,
-});
+const ui = makeUi;
 
 function spy(): { calls: string[]; actions: KeyActions } {
   const calls: string[] = [];

@@ -3,15 +3,12 @@ import { frameLines } from '../src/app/render';
 import { glyphs, strip } from '../src/ui/ansi';
 import { visibleWidth } from '../src/core/format';
 import type { UiState, View } from '../src/model/types';
-import { makeSnapshot, makeVerdicts } from './helpers/snapshot';
+import { makeSnapshot, makeUi, makeVerdicts } from './helpers/snapshot';
 
 const ASCII_RE = /^[\x00-\x7f]*$/;
 // the fixture's video reason has a literal '·'; real verdicts use g.sep, which is '|' in --ascii
 const asciiSnap = () => makeSnapshot({ verdicts: makeVerdicts({ 'VIDEO CALL': { reason: 'jitter 71ms | audio ok' } }) });
-const ui = (view: View): UiState => ({
-  view, bellOn: true, flashTicksLeft: 0, footerMsg: null, footerMsgUntil: null,
-  lastSpeed: null, speedRunning: false, logStatus: null,
-});
+const ui = (view: View): UiState => makeUi({ view });
 const SIZES = [{ cols: 40, rows: 10 }, { cols: 60, rows: 15 }, { cols: 80, rows: 24 }, { cols: 100, rows: 30 }, { cols: 160, rows: 50 }];
 
 test('every view x size x glyph set: exactly rows lines, none wider than cols', () => {
