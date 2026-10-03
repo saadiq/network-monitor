@@ -11,7 +11,7 @@ It is built for any link you don't control: home and office Wi-Fi, hotel and caf
 
 ## Requirements
 
-- macOS (uses `ping`, `route`, `scutil`, `networksetup`, `system_profiler`, `dig`, `curl`, `netstat` — all read-only, no admin rights)
+- macOS (uses `ping`, `route`, `scutil`, `networksetup`, `ipconfig`, `system_profiler`, `dig`, `curl`, `netstat` — all read-only, no admin rights — plus `open` for the `o` key)
 - [Bun](https://bun.sh) 1.4+
 - No install step, no `sudo`, zero runtime dependencies. Never changes network settings.
 
@@ -52,11 +52,11 @@ Quit with `q` or Ctrl-C — either way it prints a one-screen summary of the ses
 
 ## Reading the screen
 
-netmon opens in the **simple view**: a colored state badge, the four activity verdicts as colored chips, the hop path as a chain of colored dots, a latency chart for the last minute (bars green/yellow/red by quality, `x` = lost), and the 15-minute timeline with a one-line drop summary. Press `v` (or start with `--advanced`) for the **advanced view** described below, with every number.
+netmon opens in the **simple view**: a colored state badge with a one-sentence summary, the four activity verdicts as colored chips, the hop path as a chain of colored dots (✔/~/✘ with `--no-color`), a latency chart of the last 60 pings (bars green/yellow/red by quality, `x` = lost) captioned with the last speed-test result when there's room, the 15-minute timeline with a one-line drop summary, and the tip line. Press `v` (or start with `--advanced`) for the **advanced view** described below, with every number.
 
 ### State & grade
 
-Top line: a colored state word, a letter grade, and how long it's been stable (or how long it's been down).
+Top line: a colored state word, a letter grade, and how long it's been stable (or how long it's been down), followed by a one-sentence plain-English summary of what will and won't work. In the advanced view a header above it shows the egress interface, gateway, DNS server (`(ts)` when it's Tailscale's), probe traffic so far, the clock, and run time.
 
 - **UP** — everything's working. **DEGRADED** — up but hurting (bad DNS, failing web requests, or just poor quality). **DOWN** — no internet; the cause is one of `wifi` (weak/lost signal), `router` (can't reach the gateway), or `uplink` (gateway's fine, the upstream link isn't). **PORTAL** — you're connected but logged out of the network's captive portal; press `o`. **NO LINK** — not joined to Wi-Fi, or joined but no DHCP address yet. **WARMUP** — just started, still taking its first measurements.
 - **Grade A–D**, from loss/latency/jitter over the last 60s: **A (GOOD)** — great. **B (OK)** — fine for chat and browsing. **C (POOR)** — chat works, pages crawl, skip calls. **D (BAD)** — only messaging is realistic. A grade only changes after it's been stable for 5 straight seconds, so it won't flicker on a single bad ping — and it's capped lower for a while after a fresh outage, or when drops are frequent (`FLAKY`). A trailing `~` means the grade is being measured while *your own* traffic (e.g. a download) is loading the link, so treat it as an estimate.
@@ -67,8 +67,8 @@ Four verdicts, each **OK** / **SHAKY** / **NO**, with the one binding reason:
 
 - **CHAT** — OK unless loss is over 15%, latency is past 1.5s, or you just reconnected.
 - **BROWSE** — also fails if DNS isn't resolving; shaky above ~8% loss, ~600ms latency, slow page loads, or slow DNS.
-- **VIDEO CALL** — a much stricter bar: OK needs low loss (≤3%), low jitter (≤50ms), low latency (≤250ms), at least 5 minutes since the last drop, and no more than one drop in the last 15 minutes.
-- **DOWNLOAD** (for anything sizeable, >100MB) — OK needs 97%+ uptime over the last 15 minutes and 5 clean minutes since the last drop; shaky down to 85% uptime with at most 2 recent drops.
+- **VIDEO CALL** — a much stricter bar: OK needs state UP with grade A or B, low loss (≤3%), low jitter (≤50ms), low latency (≤250ms), at least 5 minutes since the last drop, no more than one drop in the last 15 minutes, and — if a speed test ran in the last 10 minutes — at least 1.5 Mbps down. A SHAKY verdict whose loss and jitter are still fine for voice adds `audio ok`.
+- **DOWNLOAD** (for anything sizeable, >100MB) — OK needs state UP with grade C or better, 97%+ uptime over the last 15 minutes, at most 2 drops in that window, 5 clean minutes since the last drop, and — if a speed test ran in the last 10 minutes — at least 8 Mbps down; shaky down to 85% uptime with at most 2 recent drops.
 
 ### The PATH line — is it me or the network?
 
@@ -122,18 +122,21 @@ Passive monitoring (both ping streams, DNS, captive checks, the occasional HTTPS
 
 ## Known limitations
 
-- **SSID isn't shown.** macOS hides the network name from `system_profiler` unless you grant location/Wi-Fi permissions to the terminal, so netmon just shows `—` for it rather than assume.
+- **SSID isn't shown.** macOS hides the network name from `system_profiler` unless you grant location/Wi-Fi permissions to the terminal, so netmon leaves it out entirely and names the interface instead (e.g. `Wi-Fi (en1)`).
 - **IPv6 isn't measured.** All probes force IPv4 (`-4`); an IPv6-only failure wouldn't show up here.
 - **ICMP-filtered networks are judged by HTTP.** Some networks — in-flight Wi-Fi especially — block ping to the internet (not the gateway) entirely. After ~30s of that pattern with HTTP still succeeding, netmon latches into an HTTP-based mode for latency/loss/grade instead of reporting a false DOWN.
-- **Satellite links get relaxed thresholds.** On GEO-latency connections (~600ms+ baseline), netmon detects "satellite mode" and grades/verdicts relative to that baseline instead of penalizing normal satellite latency forever.
+- **Satellite links get relaxed thresholds.** On GEO-latency connections — after 2+ minutes of data, a 10th-percentile RTT of 400ms or more with ≤2% loss — netmon switches to "satellite mode" and grades/verdicts relative to that baseline instead of penalizing normal satellite latency forever.
 
 ## Development
 
 ```
-bun test                          # 397 tests, all pure logic
+bun test                          # unit tests, plus end-to-end runs of the real program (the pty one needs /usr/bin/expect)
 bunx tsc --noEmit                 # strict typecheck
-bun run scripts/render-once.ts    # renders the mock Snapshot at 100×30 and 80×24, escapes stripped
+bun run scripts/render-once.ts    # mock Snapshot in both views (--view simple|advanced|both), escapes stripped
+bun run scripts/screenshot.ts     # regenerates docs/screenshot.svg/.png (PNG needs rsvg-convert: brew install librsvg)
 ```
+
+`render-once.ts` renders the simple view at 40×10 up to 160×50 and the advanced view at 100×30 and 80×24. Re-run `screenshot.ts` after visible UI changes.
 
 To exercise the real interactive TUI under a pseudo-terminal:
 
